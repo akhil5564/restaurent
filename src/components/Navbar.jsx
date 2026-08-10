@@ -23,10 +23,21 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (pathname === '/' && typeof window !== 'undefined' && window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+    }
+  }, [pathname]);
+
   const navLinks = [
     { name: 'Home', href: '#home' },
     { name: 'About', href: '#about' },
-    { name: 'Menu', href: '#menu' },
+    { name: 'Menu', href: '/menu' },
     { name: 'Gallery', href: '#gallery' },
     { name: 'Why Us', href: '#why-us' },
     { name: 'Reviews', href: '#reviews' },
@@ -36,7 +47,9 @@ export default function Navbar() {
   const handleScrollTo = (e, id) => {
     e.preventDefault();
     setIsOpen(false);
-    if (pathname !== '/') {
+    if (id.startsWith('/')) {
+      router.push(id);
+    } else if (pathname !== '/') {
       router.push('/' + id);
     } else {
       const element = document.querySelector(id);

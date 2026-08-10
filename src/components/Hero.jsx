@@ -1,12 +1,19 @@
 "use client";
 import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, Play } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function Hero() {
+  const router = useRouter();
+
   const handleScrollTo = (id) => {
-    const element = document.querySelector(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (id.startsWith('/')) {
+      router.push(id);
+    } else {
+      const element = document.querySelector(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -76,7 +83,7 @@ export default function Hero() {
             className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center"
           >
             <button
-              onClick={() => handleScrollTo('#menu')}
+              onClick={() => handleScrollTo('/menu')}
               className="group gold-gradient-bg hover:opacity-90 text-primary-dark font-sans font-bold px-8 py-4 rounded-full text-base tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(212,175,55,0.3)] hover:shadow-[0_4px_25px_rgba(212,175,55,0.5)] hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
             >
               ORDER NOW / MENU
