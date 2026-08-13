@@ -3,31 +3,21 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Award, Flame, Leaf, BookOpen } from 'lucide-react';
 
+import { menuData } from '../data/menuData';
+
 export default function Menu() {
-  const specialties = [
-    {
-      id: 1,
-      name: 'Sizzling Garlic Butter Prawns',
-      image: '/images/dish_garlic_prawns.png',
-      popular: true,
-      veg: false,
-    },
-    {
-      id: 2,
-      name: 'Royal Kerala Fish Curry',
-      image: '/images/dish_fish_curry.png',
-      popular: true,
-      veg: false,
-      spicy: true,
-    },
-    {
-      id: 3,
-      name: 'Grand Mughal Butter Chicken',
-      image: '/images/dish_butter_chicken.png',
-      popular: true,
-      veg: false,
-    }
-  ];
+  // Use the top 3 Chef's Specials from menuData
+  const specialties = menuData.chefSpecials.slice(0, 3).map((item, index) => ({
+    id: index + 1,
+    name: item.name,
+    image: item.image,
+    price: typeof item.price === 'number' ? `₹${item.price}` : item.price,
+    description: item.description,
+    popular: true,
+    veg: item.veg,
+    spicy: item.spicy,
+    dairy: item.dairy,
+  }));
 
   return (
     <section id="menu" className="py-24 bg-primary-dark/50 luxury-pattern-bg relative">
@@ -82,7 +72,7 @@ export default function Menu() {
 
               <div className="p-6 flex flex-col flex-grow justify-between">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-2">
                     <h4 className="text-white font-serif text-xl font-bold group-hover:text-gold transition-colors">
                       {dish.name}
                     </h4>
@@ -91,6 +81,18 @@ export default function Menu() {
                   <p className="text-gray-300 text-sm leading-relaxed">
                     {dish.description}
                   </p>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-gold/10 flex justify-between items-center">
+                  <span className="text-gold font-sans font-bold text-xl">
+                    {dish.price}
+                  </span>
+                  <Link 
+                    href="/menu" 
+                    className="text-xs font-sans font-semibold text-gray-400 hover:text-gold transition-colors"
+                  >
+                    View in Menu →
+                  </Link>
                 </div>
               </div>
             </motion.div>

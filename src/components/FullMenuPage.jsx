@@ -260,12 +260,23 @@ export default function FullMenuPage() {
                       className="relative rounded-2xl p-6 glass-panel border border-gold/30 hover:border-gold/60 shadow-[0_10px_35px_-10px_rgba(197,168,128,0.08)] bg-gradient-to-br from-primary-dark/80 to-primary-light/40 overflow-hidden flex flex-col justify-between group transition-all duration-300"
                     >
                       {/* Glimmer Overlay */}
-                      <div className="absolute top-0 right-0 bg-gold/10 text-gold text-[10px] font-bold tracking-widest px-3.5 py-1.5 rounded-bl-xl uppercase flex items-center gap-1 border-l border-b border-gold/20">
+                      <div className="absolute top-0 right-0 z-10 bg-gold/10 text-gold text-[10px] font-bold tracking-widest px-3.5 py-1.5 rounded-bl-xl uppercase flex items-center gap-1 border-l border-b border-gold/20 backdrop-blur-md">
                         <Sparkles className="w-3 h-3 text-gold-accent" /> Signature
                       </div>
 
+                      {item.image && (
+                        <div className="relative h-52 w-full overflow-hidden rounded-xl mb-4 border border-gold/15">
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
+                        </div>
+                      )}
+
                       <div className="space-y-3">
-                        <div className="flex justify-between items-baseline gap-4 pr-16">
+                        <div className="flex justify-between items-baseline gap-4">
                           <h3 className="font-serif text-lg sm:text-xl font-bold text-white group-hover:text-gold transition-colors duration-200 flex items-center gap-2">
                             {item.name}
                           </h3>
@@ -308,7 +319,7 @@ export default function FullMenuPage() {
                 </div>
               ) : (
                 // 🍽️ Standard Menu Card Layout
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                   {filteredItems.map((item, idx) => (
                     <motion.div 
                       initial={{ opacity: 0, y: 15 }}
@@ -316,28 +327,40 @@ export default function FullMenuPage() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.4, delay: idx * 0.02 }}
                       key={idx} 
-                      className="space-y-1.5 group p-2 rounded-lg hover:bg-primary-light/20 transition-all duration-200"
+                      className="flex gap-4 group p-3 rounded-xl hover:bg-primary-light/30 border border-transparent hover:border-gold/15 transition-all duration-200 items-center"
                     >
-                      <div className="flex items-baseline justify-between gap-4">
-                        <h3 className="font-serif text-base sm:text-lg font-bold text-white group-hover:text-gold transition-colors duration-200 flex items-center flex-wrap gap-2">
-                          {item.name}
-                          <span className="inline-flex gap-1">
-                            {item.veg && <Leaf className="w-3.5 h-3.5 text-green-500" />}
-                            {item.spicy && <Flame className="w-3.5 h-3.5 text-red-500" />}
-                            {item.dairy && <Milk className="w-3.5 h-3.5 text-blue-400" />}
-                          </span>
-                        </h3>
-                        <div className="flex-grow border-b border-dotted border-gray-800 mx-2" />
-                        <span className="text-gold font-sans font-bold text-base whitespace-nowrap">
-                          {typeof item.price === 'number' ? `₹${item.price}` : item.price}
-                        </span>
-                      </div>
-                      
-                      {item.description && (
-                        <p className="text-gray-400 text-xs sm:text-sm leading-relaxed pr-6">
-                          {item.description}
-                        </p>
+                      {item.image && (
+                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gold/20 group-hover:border-gold/50 shadow-md">
+                          <img 
+                            src={item.image} 
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
                       )}
+
+                      <div className="flex-grow space-y-1.5 min-w-0">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <h3 className="font-serif text-base sm:text-lg font-bold text-white group-hover:text-gold transition-colors duration-200 truncate flex items-center gap-2">
+                            {item.name}
+                            <span className="inline-flex gap-1 flex-shrink-0">
+                              {item.veg && <Leaf className="w-3.5 h-3.5 text-green-500" />}
+                              {item.spicy && <Flame className="w-3.5 h-3.5 text-red-500" />}
+                              {item.dairy && <Milk className="w-3.5 h-3.5 text-blue-400" />}
+                            </span>
+                          </h3>
+                          <div className="flex-grow border-b border-dotted border-gray-800 mx-1 hidden sm:block" />
+                          <span className="text-gold font-sans font-bold text-base whitespace-nowrap">
+                            {typeof item.price === 'number' ? `₹${item.price}` : item.price}
+                          </span>
+                        </div>
+                        
+                        {item.description && (
+                          <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
                     </motion.div>
                   ))}
                 </div>
