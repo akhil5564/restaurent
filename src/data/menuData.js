@@ -7,7 +7,7 @@ export const menuData = {
       "spicy": false,
       "veg": false,
       "dairy": false,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001355.jpg"
+      "image": "/menu-images/Brazilian Churrasca/ITM0001368.jpg"
     },
     {
       "name": "Cheese Infused Chicken",
@@ -16,7 +16,7 @@ export const menuData = {
       "spicy": false,
       "veg": false,
       "dairy": true,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001362.jpg"
+      "image": "/menu-images/grilled/ITM0001361.jpg"
     },
     {
       "name": "Beef Tenderloin",
@@ -28,41 +28,13 @@ export const menuData = {
       "image": "/menu-images/Brazilian Churrasca/ITM0001364.jpg"
     },
     {
-      "name": "Slow Cooked Beef Ribs",
-      "price": 659,
-      "description": "Slow-braised beef ribs glazed in a signature glaze, served with creamy mashed potatoes and fresh greens.",
-      "spicy": false,
-      "veg": false,
-      "dairy": true,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001368.jpg"
-    },
-    {
-      "name": "Smoked Barbique Ribs",
-      "price": 659,
-      "description": "Succulent, fall-off-the-bone smoked barbecue ribs coated in a rich, tangy hickory house sauce.",
-      "spicy": false,
-      "veg": false,
-      "dairy": false,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001355.jpg"
-    },
-    {
-      "name": "Japanese Wagyu (Pre-Booked)",
-      "price": "Market Price",
-      "description": "Elite A5 Japanese Wagyu steak, highly marbled and prepared with artisanal precision. Requires booking in advance.",
-      "spicy": false,
-      "veg": false,
-      "dairy": false,
-      "special": true,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001362.jpg"
-    },
-    {
       "name": "Grilled Chicken Breast",
       "price": 494,
       "description": "Tender chicken breast marinated in fresh herbs and flame-grilled, served with seasoned roast vegetables.",
       "spicy": false,
       "veg": false,
       "dairy": false,
-      "image": "/menu-images/Brazilian Churrasca/ITM0001364.jpg"
+      "image": "/menu-images/Shawarma & Shawaya/ITM0001370.jpg"
     }
   ],
   "starters": [
@@ -792,7 +764,7 @@ export const menuData = {
       "spicy": false,
       "veg": true,
       "dairy": false,
-      "image": "/menu-images/Cold Mezze/ITM0000985.jpg"
+      "image": "/menu-images/Brazilian Churrasca/ITM0001362.jpg"
     },
     {
       "name": "Greek Salad",

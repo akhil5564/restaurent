@@ -1,9 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, Flame, ArrowLeft, Utensils, Search, Sparkles, Milk, Phone, MapPin, X, HelpCircle } from 'lucide-react';
+import { Leaf, Flame, Utensils, Search, Sparkles, Milk, MapPin, X, HelpCircle, Camera, Check, Save, Image as ImageIcon, Sliders } from 'lucide-react';
 import Link from 'next/link';
-import { menuData } from '../data/menuData';
+import { menuData as initialMenuData } from '../data/menuData';
+import { allImagesByFolder } from '../data/allImagesData';
 
 // Map categories to user-friendly titles and icons
 const categories = [
@@ -20,10 +21,19 @@ const categories = [
 ];
 
 export default function FullMenuPage() {
+  const [currentMenuData, setCurrentMenuData] = useState(initialMenuData);
   const [activeTab, setActiveTab] = useState('chefSpecials');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, veg, spicy, dairy
   const [isSticky, setIsSticky] = useState(false);
+  
+  // Interactive Image Selector states
+  const [editMode, setEditMode] = useState(false);
+  const [selectedDish, setSelectedDish] = useState(null); // { catId, itemIndex, item }
+  const [activeFolder, setActiveFolder] = useState('Appitizers');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+
   const tabsRef = useRef(null);
 
   // Scroll to top on load
@@ -36,13 +46,9 @@ export default function FullMenuPage() {
     const handleScroll = () => {
       if (!tabsRef.current) return;
       const tabOffset = tabsRef.current.offsetTop;
-      
-      // Make sticky when reaching tab offset minus header offset (typically 80px)
       setIsSticky(window.scrollY > tabOffset - 80);
       
-      // Update active tab based on scroll position of sections
       const scrollPosition = window.scrollY + 220;
-      
       for (const cat of categories) {
         const section = document.getElementById(cat.id);
         if (section) {
@@ -63,7 +69,7 @@ export default function FullMenuPage() {
   const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      const offset = 140; // Height of sticky headers
+      const offset = 140;
       const bodyRect = document.body.getBoundingClientRect().top;
       const elementRect = element.getBoundingClientRect().top;
       const elementPosition = elementRect - bodyRect;
@@ -77,17 +83,55 @@ export default function FullMenuPage() {
     }
   };
 
+  // Assign selected image to current dish
+  const handleAssignImage = (imagePath) => {
+    if (!selectedDish) return;
+    const { catId, itemIndex } = selectedDish;
+
+    const updatedData = { ...currentMenuData };
+    updatedData[catId][itemIndex] = {
+      ...updatedData[catId][itemIndex],
+      image: imagePath,
+    };
+
+    setCurrentMenuData(updatedData);
+    setSelectedDish(null);
+  };
+
+  // Save changes to menuData.js via API route
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setSaveMessage('');
+    try {
+      const res = await fetch('/api/save-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menuData: currentMenuData }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveMessage('✓ Changes saved permanently to menuData.js!');
+        setTimeout(() => setSaveMessage(''), 4000);
+      } else {
+        setSaveMessage('Error saving: ' + data.error);
+      }
+    } catch (err) {
+      setSaveMessage('Error saving menuData.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Helper to filter items based on search query and selected filter type
   const getFilteredItems = (catId, categoryItems) => {
-    // If it's salads category, we also merge meals items
     let items = [...categoryItems];
-    if (catId === 'salads' && menuData.meals) {
-      items = [...items, ...menuData.meals];
+    if (catId === 'salads' && currentMenuData.meals) {
+      items = [...items, ...currentMenuData.meals];
     }
 
     return items.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            item.description.toLowerCase().includes(searchQuery.toLowerCase());
+                            (item.description && item.description.toLowerCase().includes(searchQuery.toLowerCase()));
       
       const matchesFilter = 
         filterType === 'all' ||
@@ -99,18 +143,63 @@ export default function FullMenuPage() {
     });
   };
 
+  const imageFolders = Object.keys(allImagesByFolder);
+
   return (
-    <div className="pt-20 bg-primary-bg min-h-screen text-gray-200">
+    <div className="pt-20 bg-primary-bg min-h-screen text-gray-200 relative pb-28">
       
+      {/* Dev Mode / Image Matcher Toggle Banner */}
+      <div className="bg-gold/15 border-b border-gold/30 py-3.5 px-4 sticky top-16 z-40 backdrop-blur-md flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Camera className="w-5 h-5 text-gold animate-pulse" />
+          <div>
+            <span className="font-serif font-bold text-white text-sm">Interactive Image Matcher</span>
+            <p className="text-xs text-gray-300">Click any dish photo to pick & swap suitable images directly from the 180+ dish library.</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+              editMode 
+                ? 'bg-gold text-primary-dark shadow-lg shadow-gold/20' 
+                : 'bg-primary-dark/80 text-gold border border-gold/40 hover:bg-gold/10'
+            }`}
+          >
+            <Sliders className="w-4 h-4" />
+            {editMode ? 'Matcher Mode ACTIVE' : 'Enable Photo Matcher'}
+          </button>
+
+          {editMode && (
+            <button
+              onClick={handleSaveChanges}
+              disabled={isSaving}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-5 py-2 rounded-full text-xs font-bold shadow-lg transition-all"
+            >
+              <Save className="w-4 h-4" />
+              {isSaving ? 'Saving...' : 'Save All Changes'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {saveMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-green-900 border border-green-400 text-white px-6 py-3 rounded-2xl shadow-2xl font-sans text-sm font-semibold flex items-center gap-2 animate-bounce">
+          <Check className="w-5 h-5 text-green-300" />
+          {saveMessage}
+        </div>
+      )}
+
       {/* 1. Hero / Header Banner */}
       <div 
-        className="relative h-[45vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="relative h-[40vh] flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/images/interior_1.png')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-primary-dark/95 via-primary-dark/80 to-primary-bg backdrop-blur-[1px]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(197,168,128,0.12),transparent_70%)]" />
 
-        <div className="relative text-center max-w-3xl px-4 space-y-4 z-10">
+        <div className="relative text-center max-w-3xl px-4 space-y-3 z-10">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -123,9 +212,9 @@ export default function FullMenuPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-wide"
+            className="font-serif text-4xl sm:text-5xl font-bold text-white tracking-wide"
           >
-            The Culinary Menu
+            The Gourmet Culinary Menu
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -139,7 +228,7 @@ export default function FullMenuPage() {
       </div>
 
       {/* 2. Interactive Search & Filters Section */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-[-40px] relative z-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-[-30px] relative z-20">
         <div className="glass-panel rounded-2xl p-6 shadow-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
           
           {/* Search Box */}
@@ -193,7 +282,7 @@ export default function FullMenuPage() {
         ref={tabsRef}
         className={`z-30 transition-all duration-300 ${
           isSticky 
-            ? 'fixed top-16 left-0 right-0 bg-primary-bg/95 backdrop-blur-md border-b border-gold/10 py-3 shadow-xl' 
+            ? 'fixed top-28 left-0 right-0 bg-primary-bg/95 backdrop-blur-md border-b border-gold/10 py-3 shadow-xl' 
             : 'mt-8 py-4'
         }`}
       >
@@ -219,10 +308,9 @@ export default function FullMenuPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         
         {categories.map((cat) => {
-          const rawItems = menuData[cat.id] || [];
+          const rawItems = currentMenuData[cat.id] || [];
           const filteredItems = getFilteredItems(cat.id, rawItems);
 
-          // Skip section if query yields no results
           if (filteredItems.length === 0 && searchQuery) return null;
 
           return (
@@ -247,33 +335,70 @@ export default function FullMenuPage() {
 
               {/* Grid Layout depending on Category */}
               {cat.id === 'chefSpecials' ? (
-                // 👑 Chef Specials Grid (Gilded, Premium Highlight Cards)
+                // 👑 Chef Specials Grid
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {filteredItems.map((item, idx) => (
+                  {filteredItems.map((item, itemIdx) => (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: idx * 0.05 }}
+                      transition={{ duration: 0.5, delay: itemIdx * 0.05 }}
                       whileHover={{ y: -6 }}
-                      key={idx}
+                      key={itemIdx}
                       className="relative rounded-2xl p-6 glass-panel border border-gold/30 hover:border-gold/60 shadow-[0_10px_35px_-10px_rgba(197,168,128,0.08)] bg-gradient-to-br from-primary-dark/80 to-primary-light/40 overflow-hidden flex flex-col justify-between group transition-all duration-300"
                     >
-                      {/* Glimmer Overlay */}
                       <div className="absolute top-0 right-0 z-10 bg-gold/10 text-gold text-[10px] font-bold tracking-widest px-3.5 py-1.5 rounded-bl-xl uppercase flex items-center gap-1 border-l border-b border-gold/20 backdrop-blur-md">
                         <Sparkles className="w-3 h-3 text-gold-accent" /> Signature
                       </div>
 
-                      {item.image && (
-                        <div className="relative h-52 w-full overflow-hidden rounded-xl mb-4 border border-gold/15">
+                      <div className="relative h-56 w-full overflow-hidden rounded-xl mb-4 border border-gold/15 group">
+                        {item.image ? (
                           <img 
                             src={item.image} 
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="w-full h-full bg-primary-dark flex items-center justify-center text-gray-500 text-xs">No Image</div>
+                        )}
+                        
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
+                        
+                        {editMode && (
+                          <div className="absolute bottom-2 left-2 right-2 z-20 bg-primary-dark/95 backdrop-blur-md p-2 rounded-xl border border-gold/40 flex items-center gap-2 overflow-x-auto scrollbar-none">
+                            <span className="text-[10px] font-bold text-gold uppercase whitespace-nowrap px-1">Pick Photo:</span>
+                            {[
+                              { label: 'Smoked Brisket', path: '/menu-images/Brazilian Churrasca/ITM0001368.jpg' },
+                              { label: 'Beef Ribs', path: '/menu-images/Brazilian Churrasca/ITM0001355.jpg' },
+                              { label: 'Tenderloin Steak', path: '/menu-images/Brazilian Churrasca/ITM0001364.jpg' },
+                              { label: 'BBQ Ribs', path: '/menu-images/grilled/ITM0001353.jpg' },
+                              { label: 'Wagyu Steak', path: '/menu-images/grilled/ITM0001360.jpg' },
+                              { label: 'Cheese Chicken', path: '/menu-images/grilled/ITM0001361.jpg' },
+                              { label: 'Grilled Chicken', path: '/menu-images/Shawarma & Shawaya/ITM0001370.jpg' }
+                            ].map((pObj, pIdx) => (
+                              <button
+                                key={pIdx}
+                                onClick={() => handleAssignImage(pObj.path)}
+                                className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all relative ${
+                                  item.image === pObj.path ? 'border-gold ring-2 ring-gold' : 'border-gold/20 hover:border-gold/70'
+                                }`}
+                                title={pObj.label}
+                              >
+                                <img src={pObj.path} alt={pObj.label} className="w-full h-full object-cover" />
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => {
+                                setSelectedDish({ catId: cat.id, itemIndex: itemIdx, item });
+                                setActiveFolder('Brazilian Churrasca');
+                              }}
+                              className="flex-shrink-0 bg-gold text-primary-dark text-[10px] font-bold px-2 py-1 rounded-lg uppercase whitespace-nowrap ml-auto"
+                            >
+                              More...
+                            </button>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="space-y-3">
                         <div className="flex justify-between items-baseline gap-4">
@@ -281,7 +406,6 @@ export default function FullMenuPage() {
                             {item.name}
                           </h3>
                         </div>
-                        
                         <p className="text-gray-400 text-sm leading-relaxed pr-4">
                           {item.description}
                         </p>
@@ -289,26 +413,9 @@ export default function FullMenuPage() {
 
                       <div className="mt-6 pt-4 border-t border-gold/10 flex justify-between items-center">
                         <div className="flex gap-2">
-                          {item.veg && (
-                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-green-500 bg-green-950/20 border border-green-500/20 px-2 py-0.5 rounded-full">
-                              <Leaf className="w-2.5 h-2.5" /> Veg
-                            </span>
-                          )}
-                          {!item.veg && (
-                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-500 bg-red-950/20 border border-red-500/20 px-2 py-0.5 rounded-full">
-                              Non-Veg
-                            </span>
-                          )}
-                          {item.spicy && (
-                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400 bg-red-950/20 border border-red-400/20 px-2 py-0.5 rounded-full">
-                              <Flame className="w-2.5 h-2.5" /> Spicy
-                            </span>
-                          )}
-                          {item.dairy && (
-                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-blue-400 bg-blue-950/20 border border-blue-400/20 px-2 py-0.5 rounded-full">
-                              <Milk className="w-2.5 h-2.5" /> Dairy
-                            </span>
-                          )}
+                          {item.veg && <span className="text-[10px] uppercase font-bold text-green-500 bg-green-950/20 border border-green-500/20 px-2 py-0.5 rounded-full flex items-center gap-1"><Leaf className="w-2.5 h-2.5" /> Veg</span>}
+                          {!item.veg && <span className="text-[10px] uppercase font-bold text-red-500 bg-red-950/20 border border-red-500/20 px-2 py-0.5 rounded-full">Non-Veg</span>}
+                          {item.spicy && <span className="text-[10px] uppercase font-bold text-red-400 bg-red-950/20 border border-red-400/20 px-2 py-0.5 rounded-full flex items-center gap-1"><Flame className="w-2.5 h-2.5" /> Spicy</span>}
                         </div>
                         <span className="text-gold font-sans font-bold text-xl">
                           {typeof item.price === 'number' ? `₹${item.price}` : item.price}
@@ -320,24 +427,45 @@ export default function FullMenuPage() {
               ) : (
                 // 🍽️ Standard Menu Card Layout
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  {filteredItems.map((item, idx) => (
+                  {filteredItems.map((item, itemIdx) => (
                     <motion.div 
                       initial={{ opacity: 0, y: 15 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: idx * 0.02 }}
-                      key={idx} 
-                      className="flex gap-4 group p-3 rounded-xl hover:bg-primary-light/30 border border-transparent hover:border-gold/15 transition-all duration-200 items-center"
+                      transition={{ duration: 0.4, delay: itemIdx * 0.02 }}
+                      key={itemIdx} 
+                      className="flex gap-4 group p-3 rounded-xl hover:bg-primary-light/30 border border-transparent hover:border-gold/15 transition-all duration-200 items-center relative"
                     >
-                      {item.image && (
-                        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gold/20 group-hover:border-gold/50 shadow-md">
+                      <div className="relative w-22 h-22 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gold/20 group-hover:border-gold/50 shadow-md">
+                        {item.image ? (
                           <img 
                             src={item.image} 
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                        </div>
-                      )}
+                        ) : (
+                          <div className="w-full h-full bg-primary-dark flex items-center justify-center text-gray-500 text-xs">No Image</div>
+                        )}
+
+                        {editMode && (
+                          <button
+                            onClick={() => {
+                              setSelectedDish({ catId: cat.id, itemIndex: itemIdx, item });
+                              // Smart default folder selector
+                              if (cat.id === 'dosas') setActiveFolder('Dosa Corner_ Porotta');
+                              else if (cat.id === 'burgers') setActiveFolder(item.name.toLowerCase().includes('pizza') ? 'pizza' : 'burger & sandwiches');
+                              else if (cat.id === 'beverages') setActiveFolder(item.name.toLowerCase().includes('mojito') ? 'mojito' : 'milk shakes');
+                              else if (cat.id === 'smoothies') setActiveFolder('fresh juices');
+                              else if (cat.id === 'grills') setActiveFolder('Shawarma & Shawaya');
+                              else if (cat.id === 'starters') setActiveFolder('Appitizers');
+                              else setActiveFolder('Appitizers');
+                            }}
+                            className="absolute inset-0 bg-primary-dark/85 backdrop-blur-xs text-gold text-[10px] font-extrabold flex flex-col items-center justify-center gap-1 hover:bg-gold hover:text-primary-dark transition-all"
+                          >
+                            <Camera className="w-4 h-4" /> Change
+                          </button>
+                        )}
+                      </div>
 
                       <div className="flex-grow space-y-1.5 min-w-0">
                         <div className="flex items-baseline justify-between gap-2">
@@ -346,7 +474,6 @@ export default function FullMenuPage() {
                             <span className="inline-flex gap-1 flex-shrink-0">
                               {item.veg && <Leaf className="w-3.5 h-3.5 text-green-500" />}
                               {item.spicy && <Flame className="w-3.5 h-3.5 text-red-500" />}
-                              {item.dairy && <Milk className="w-3.5 h-3.5 text-blue-400" />}
                             </span>
                           </h3>
                           <div className="flex-grow border-b border-dotted border-gray-800 mx-1 hidden sm:block" />
@@ -360,6 +487,12 @@ export default function FullMenuPage() {
                             {item.description}
                           </p>
                         )}
+
+                        {editMode && (
+                          <span className="text-[10px] font-mono text-gold/70 block truncate">
+                            {item.image || 'No image path'}
+                          </span>
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -369,87 +502,110 @@ export default function FullMenuPage() {
           );
         })}
 
-        {/* Empty Search Result State */}
-        {searchQuery && categories.every(cat => getFilteredItems(cat.id, menuData[cat.id] || []).length === 0) && (
+      </div>
+
+      {/* Interactive Image Matcher Modal */}
+      <AnimatePresence>
+        {selectedDish && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-20 space-y-4"
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4"
           >
-            <div className="w-16 h-16 rounded-full bg-primary-light flex items-center justify-center mx-auto border border-gold/10">
-              <HelpCircle className="w-8 h-8 text-gold/60" />
-            </div>
-            <h3 className="font-serif text-xl font-semibold text-white">No dishes match your search</h3>
-            <p className="text-gray-400 max-w-sm mx-auto text-sm">
-              We couldn't find anything matching "{searchQuery}". Try searching for categories or clear the search to see all options.
-            </p>
-            <button 
-              onClick={() => { setSearchQuery(''); setFilterType('all'); }}
-              className="bg-gold hover:bg-gold-dark text-primary-dark font-sans font-bold py-2 px-6 rounded-full text-xs tracking-wider transition-all duration-300"
+            <motion.div 
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-primary-dark border border-gold/30 rounded-3xl max-w-4xl w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl"
             >
-              Clear Filters
-            </button>
+              {/* Modal Header */}
+              <div className="p-6 border-b border-gold/20 flex justify-between items-center bg-primary-light/40">
+                <div>
+                  <span className="text-gold text-xs font-bold uppercase tracking-widest block mb-1">Select Photo For Dish</span>
+                  <h3 className="text-2xl font-serif font-bold text-white flex items-center gap-2">
+                    {selectedDish.item.name}
+                  </h3>
+                </div>
+
+                <button 
+                  onClick={() => setSelectedDish(null)}
+                  className="w-10 h-10 rounded-full bg-primary-dark border border-gold/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-gold transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Folder Filter Tabs */}
+              <div className="p-4 border-b border-gold/10 overflow-x-auto scrollbar-none flex gap-2 bg-primary-dark/80">
+                {imageFolders.map(folder => (
+                  <button
+                    key={folder}
+                    onClick={() => setActiveFolder(folder)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                      activeFolder === folder
+                        ? 'bg-gold text-primary-dark font-extrabold shadow-md'
+                        : 'bg-primary-light/40 text-gray-400 hover:text-white hover:bg-primary-light'
+                    }`}
+                  >
+                    {folder} ({(allImagesByFolder[folder] || []).length})
+                  </button>
+                ))}
+              </div>
+
+              {/* Images Grid */}
+              <div className="p-6 overflow-y-auto flex-grow grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 scrollbar-thin">
+                {(allImagesByFolder[activeFolder] || []).map((imgObj, idx) => {
+                  const isCurrent = selectedDish.item.image === imgObj.path;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleAssignImage(imgObj.path)}
+                      className={`relative aspect-square rounded-2xl overflow-hidden border-2 transition-all group text-left ${
+                        isCurrent 
+                          ? 'border-gold ring-4 ring-gold/30 scale-95 shadow-2xl' 
+                          : 'border-gold/15 hover:border-gold/60 hover:scale-102'
+                      }`}
+                    >
+                      <img 
+                        src={imgObj.path} 
+                        alt={imgObj.filename}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2.5">
+                        <span className="text-[11px] font-mono font-semibold text-gold truncate">
+                          {imgObj.filename}
+                        </span>
+                      </div>
+
+                      {isCurrent && (
+                        <div className="absolute top-2 right-2 bg-gold text-primary-dark p-1 rounded-full font-bold shadow-lg">
+                          <Check className="w-4 h-4" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-gold/15 bg-primary-light/30 flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                  Current image: <code className="text-gold font-mono">{selectedDish.item.image || 'None'}</code>
+                </span>
+                <button
+                  onClick={() => setSelectedDish(null)}
+                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-primary-dark border border-gold/30 text-white hover:bg-gold hover:text-primary-dark transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* 5. Branch Reservations & Dining Inquiry Panel */}
-        <div className="mt-24 border-t border-gold/15 pt-16">
-          <div className="glass-panel rounded-3xl p-8 sm:p-12 relative overflow-hidden bg-gradient-to-r from-primary-dark to-primary-light">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(197,168,128,0.08),transparent_50%)]" />
-            
-            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-              
-              <div className="lg:col-span-2 space-y-4">
-                <span className="text-gold font-sans font-bold tracking-widest text-xs uppercase block">Fine Dining & Table Reservations</span>
-                <h3 className="font-serif text-3xl font-bold text-white">Experience Luxury Dining</h3>
-                <p className="text-gray-300 font-sans text-sm max-w-2xl leading-relaxed">
-                  Call our branch desks directly to secure your table, coordinate premium group dining, or inquire about custom culinary requests at our luxury restaurant locations.
-                </p>
-                
-                {/* Branch Contacts list */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                  {[
-                    { branch: "M.G. Road", phone: "70456 71111", area: "Thrissur Town" },
-                    { branch: "Ayyanthole", phone: "70456 72222", area: "Collectorate Junction" },
-                    { branch: "Koorkenchery", phone: "70456 73333", area: "Elite Hospital Road" }
-                  ].map((branch, idx) => (
-                    <div key={idx} className="bg-primary-dark/60 p-4 rounded-xl border border-gold/10 hover:border-gold/20 transition-all">
-                      <div className="flex items-center gap-2 text-gold font-serif font-bold text-sm mb-1">
-                        <MapPin className="w-3.5 h-3.5" />
-                        {branch.branch}
-                      </div>
-                      <a href={`tel:${branch.phone.replace(/\s/g, '')}`} className="text-white hover:text-gold font-sans font-extrabold text-sm block transition-colors">
-                        {branch.phone}
-                      </a>
-                      <span className="text-[10px] text-gray-500 block uppercase font-sans tracking-wide mt-1">
-                        {branch.area}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Back to home buttons */}
-              <div className="flex flex-col gap-3 w-full sm:w-auto sm:mx-auto lg:w-full items-center lg:items-end">
-                <Link
-                  href="/"
-                  className="w-full sm:w-60 text-center bg-transparent hover:bg-gold border-2 border-gold text-gold hover:text-primary-dark font-sans font-bold py-4 px-8 rounded-full text-xs tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(212,175,55,0.05)] cursor-pointer"
-                >
-                  RETURN TO HOME
-                </Link>
-                <Link
-                  href="/contact"
-                  className="w-full sm:w-60 text-center bg-gold hover:bg-gold-light text-primary-dark font-sans font-bold py-4 px-8 rounded-full text-xs tracking-wider transition-all duration-300 shadow-[0_4px_20px_rgba(212,175,55,0.15)] cursor-pointer"
-                >
-                  GET IN TOUCH
-                </Link>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
   );
 }

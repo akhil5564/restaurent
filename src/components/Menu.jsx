@@ -6,8 +6,8 @@ import { Award, Flame, Leaf, BookOpen } from 'lucide-react';
 import { menuData } from '../data/menuData';
 
 export default function Menu() {
-  // Use the top 3 Chef's Specials from menuData
-  const specialties = menuData.chefSpecials.slice(0, 3).map((item, index) => ({
+  // Use all items from chefSpecials
+  const specialties = menuData.chefSpecials.map((item, index) => ({
     id: index + 1,
     name: item.name,
     image: item.image,
@@ -38,8 +38,8 @@ export default function Menu() {
           </p>
         </div>
 
-        {/* 3 Specialties Grid (Normal Layout) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        {/* 4 Specialties Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {specialties.map((dish, index) => (
             <motion.div
               key={dish.id}
