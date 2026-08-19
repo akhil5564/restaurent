@@ -33,7 +33,7 @@ export default function About() {
             
             {/* Overlay Info Card */}
             <div className="absolute bottom-6 right-6 z-20 glass-panel p-6 rounded-xl shadow-xl max-w-xs border border-gold/30">
-              <div className="font-serif text-gold text-4xl font-bold mb-1">8+</div>
+              <div className="font-serif text-gold text-4xl font-bold mb-1">4+</div>
               <div className="text-white text-sm font-semibold tracking-wider uppercase mb-1">Years of Culinary Excellence</div>
               <div className="text-gray-300 text-xs leading-relaxed">Serving authentic Kerala, Indian, and Continental delicacies.</div>
             </div>
@@ -56,7 +56,7 @@ export default function About() {
             </div>
 
             <p className="font-sans text-gray-300 text-base sm:text-lg leading-relaxed">
-              Kanary Restaurant has been Thrissur's premier multi-cuisine dining destination since 2018. Known for our rich flavors and uncompromising quality, we take pride in using premium, wholesome ingredients like pure A2 milk and A2 ghee to elevate our traditional recipes.
+              Kanary Restaurant has been Thrissur's premier multi-cuisine dining destination since 2022. Known for our rich flavors and uncompromising quality, we take pride in using premium, wholesome ingredients like pure A2 milk and A2 ghee to elevate our traditional recipes.
             </p>
 
             <p className="font-sans text-gray-400 text-sm sm:text-base leading-relaxed">

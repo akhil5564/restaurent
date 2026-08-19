@@ -8,6 +8,7 @@ import PromoVideo from '../components/PromoVideo';
 import Reviews from '../components/Reviews';
 import Reservation from '../components/Reservation';
 import Contact from '../components/Contact';
+import ShortsSection from '../components/ShortsSection';
 
 export default function HomePage() {
   return (
@@ -35,10 +36,8 @@ export default function HomePage() {
         <Menu />
       </section>
 
-      
-      
-
-      
+      {/* YouTube Shorts Gallery */}
+      <ShortsSection />
 
       {/* Video Showcase & Stats Count Panel */}
       <PromoVideo />

@@ -79,7 +79,7 @@ export default function Footer() {
               </div>
             </a>
             <p className="text-gray-400 text-xs sm:text-sm max-w-xs leading-relaxed mt-2">
-              Thrissur's premier multi-cuisine dining experience, serving authentic culinary delicacies made with premium A2 milk and ghee since 2018.
+              Thrissur's premier multi-cuisine dining experience, serving authentic culinary delicacies made with premium A2 milk and ghee since 2022.
             </p>
           </div>
 
