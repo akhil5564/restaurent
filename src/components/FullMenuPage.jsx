@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, Flame, Utensils, Search, Sparkles, Milk, MapPin, X, HelpCircle, Camera, Check, Save, Image as ImageIcon, Sliders } from 'lucide-react';
+import { Leaf, Flame, Utensils, Search, Sparkles, Milk, MapPin, X, HelpCircle, Camera, Check, Save, Image as ImageIcon, Sliders, Plus, Upload, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { menuData as initialMenuData } from '../data/menuData';
 import { allImagesByFolder } from '../data/allImagesData';
@@ -33,6 +33,95 @@ export default function FullMenuPage() {
   const [activeFolder, setActiveFolder] = useState('Appitizers');
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+
+  // Add New Dish State
+  const [showAddDishModal, setShowAddDishModal] = useState(false);
+  const [newDish, setNewDish] = useState({
+    name: '',
+    price: '',
+    description: '',
+    category: 'chefSpecials',
+    spicy: false,
+    veg: false,
+    dairy: false,
+    image: '',
+    imageSource: 'upload', // 'upload' | 'library' | 'url'
+  });
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewDish(prev => ({ ...prev, image: reader.result, imageSource: 'upload' }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddNewDishSubmit = async (e) => {
+    e.preventDefault();
+    if (!newDish.name.trim() || !newDish.price) {
+      alert("Please enter a Dish Name and Price.");
+      return;
+    }
+
+    const catId = newDish.category;
+    const dishObj = {
+      name: newDish.name.trim(),
+      price: isNaN(newDish.price) ? newDish.price : Number(newDish.price),
+      description: newDish.description.trim(),
+      spicy: newDish.spicy,
+      veg: newDish.veg,
+      dairy: newDish.dairy,
+      image: newDish.image || '/menu-images/Soups/ITM0000557.jpg',
+    };
+
+    const updatedData = { ...currentMenuData };
+    if (!updatedData[catId]) {
+      updatedData[catId] = [];
+    }
+    // Add new dish at beginning of chosen category
+    updatedData[catId] = [dishObj, ...updatedData[catId]];
+
+    setCurrentMenuData(updatedData);
+    setShowAddDishModal(false);
+
+    // Reset form
+    setNewDish({
+      name: '',
+      price: '',
+      description: '',
+      category: 'chefSpecials',
+      spicy: false,
+      veg: false,
+      dairy: false,
+      image: '',
+      imageSource: 'upload',
+    });
+
+    // Auto save to menuData.js
+    setIsSaving(true);
+    setSaveMessage('');
+    try {
+      const res = await fetch('/api/save-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menuData: updatedData }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveMessage(`✓ New dish "${dishObj.name}" added & saved permanently!`);
+        setTimeout(() => setSaveMessage(''), 4500);
+      } else {
+        setSaveMessage('Dish added to menu!');
+      }
+    } catch (err) {
+      setSaveMessage('Dish added to menu!');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const tabsRef = useRef(null);
 
@@ -160,8 +249,16 @@ export default function FullMenuPage() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setShowAddDishModal(true)}
+            className="flex items-center gap-2 bg-gold hover:bg-gold-light text-primary-dark font-sans px-4 py-2 rounded-full text-xs font-bold shadow-lg transition-all cursor-pointer hover:scale-105"
+          >
+            <Plus className="w-4 h-4" />
+            Add New Dish
+          </button>
+
+          <button
             onClick={() => setEditMode(!editMode)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
               editMode 
                 ? 'bg-gold text-primary-dark shadow-lg shadow-gold/20' 
                 : 'bg-primary-dark/80 text-gold border border-gold/40 hover:bg-gold/10'
@@ -175,7 +272,7 @@ export default function FullMenuPage() {
             <button
               onClick={handleSaveChanges}
               disabled={isSaving}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-5 py-2 rounded-full text-xs font-bold shadow-lg transition-all"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-5 py-2 rounded-full text-xs font-bold shadow-lg transition-all cursor-pointer"
             >
               <Save className="w-4 h-4" />
               {isSaving ? 'Saving...' : 'Save All Changes'}
@@ -601,6 +698,278 @@ export default function FullMenuPage() {
                   Close
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Add New Dish Modal */}
+      <AnimatePresence>
+        {showAddDishModal && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-primary-dark border border-gold/30 rounded-3xl max-w-2xl w-full my-8 overflow-hidden shadow-2xl flex flex-col"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-gold/20 flex justify-between items-center bg-primary-light/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold">
+                    <PlusCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif font-bold text-white">Add New Dish</h3>
+                    <p className="text-xs text-gray-400">Fill in dish details to publish directly to the menu.</p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => setShowAddDishModal(false)}
+                  className="w-9 h-9 rounded-full bg-primary-dark border border-gold/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-gold transition-all cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Form Body */}
+              <form onSubmit={handleAddNewDishSubmit} className="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+                
+                {/* Category Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-gold uppercase tracking-wider mb-2">
+                    Menu Category *
+                  </label>
+                  <select
+                    value={newDish.category}
+                    onChange={(e) => setNewDish({ ...newDish, category: e.target.value })}
+                    className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-3 text-white font-sans text-sm focus:border-gold outline-none"
+                  >
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id} className="bg-primary-dark text-white">
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Dish Name & Price */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+                      Dish Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Sizzling Garlic Prawns"
+                      value={newDish.name}
+                      onChange={(e) => setNewDish({ ...newDish, name: e.target.value })}
+                      className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-2.5 text-white font-sans text-sm focus:border-gold outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+                      Price (₹) *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 350 or 250 / 450"
+                      value={newDish.price}
+                      onChange={(e) => setNewDish({ ...newDish, price: e.target.value })}
+                      className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-2.5 text-white font-sans text-sm focus:border-gold outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+                    Description
+                  </label>
+                  <textarea
+                    rows="2"
+                    placeholder="Short mouth-watering description of ingredients & flavors..."
+                    value={newDish.description}
+                    onChange={(e) => setNewDish({ ...newDish, description: e.target.value })}
+                    className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-2.5 text-white font-sans text-sm focus:border-gold outline-none resize-none"
+                  ></textarea>
+                </div>
+
+                {/* Dietary Flags */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">
+                    Dietary & Flavor Badges
+                  </label>
+                  <div className="flex flex-wrap gap-4 bg-primary-light/20 p-3 rounded-xl border border-white/5">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300 hover:text-white">
+                      <input
+                        type="checkbox"
+                        checked={newDish.veg}
+                        onChange={(e) => setNewDish({ ...newDish, veg: e.target.checked })}
+                        className="rounded accent-gold w-4 h-4"
+                      />
+                      <Leaf className="w-3.5 h-3.5 text-green-400" />
+                      Vegetarian
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300 hover:text-white">
+                      <input
+                        type="checkbox"
+                        checked={newDish.spicy}
+                        onChange={(e) => setNewDish({ ...newDish, spicy: e.target.checked })}
+                        className="rounded accent-gold w-4 h-4"
+                      />
+                      <Flame className="w-3.5 h-3.5 text-red-400" />
+                      Spicy
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer text-xs text-gray-300 hover:text-white">
+                      <input
+                        type="checkbox"
+                        checked={newDish.dairy}
+                        onChange={(e) => setNewDish({ ...newDish, dairy: e.target.checked })}
+                        className="rounded accent-gold w-4 h-4"
+                      />
+                      <Milk className="w-3.5 h-3.5 text-blue-300" />
+                      Contains Dairy
+                    </label>
+                  </div>
+                </div>
+
+                {/* Dish Photo Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-gold uppercase tracking-wider mb-2">
+                    Dish Photo Image
+                  </label>
+                  
+                  {/* Source Options Tabs */}
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setNewDish({ ...newDish, imageSource: 'upload' })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        newDish.imageSource === 'upload'
+                          ? 'bg-gold text-primary-dark'
+                          : 'bg-primary-light/40 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewDish({ ...newDish, imageSource: 'library' })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        newDish.imageSource === 'library'
+                          ? 'bg-gold text-primary-dark'
+                          : 'bg-primary-light/40 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      Pick from Library
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewDish({ ...newDish, imageSource: 'url' })}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        newDish.imageSource === 'url'
+                          ? 'bg-gold text-primary-dark'
+                          : 'bg-primary-light/40 text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      Image URL
+                    </button>
+                  </div>
+
+                  {/* Upload File Input */}
+                  {newDish.imageSource === 'upload' && (
+                    <div className="border-2 border-dashed border-gold/30 rounded-xl p-4 text-center bg-primary-light/20 hover:border-gold/60 transition-colors cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="dish-file-upload"
+                      />
+                      <label htmlFor="dish-file-upload" className="cursor-pointer flex flex-col items-center gap-2">
+                        <Upload className="w-6 h-6 text-gold" />
+                        <span className="text-xs font-semibold text-gray-300">Click to upload image file from device</span>
+                        <span className="text-[10px] text-gray-500">Supports JPG, PNG, WEBP</span>
+                      </label>
+                    </div>
+                  )}
+
+                  {/* Library Selector */}
+                  {newDish.imageSource === 'library' && (
+                    <div className="space-y-2">
+                      <select
+                        value={newDish.image}
+                        onChange={(e) => setNewDish({ ...newDish, image: e.target.value })}
+                        className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-2.5 text-white font-sans text-xs outline-none"
+                      >
+                        <option value="">-- Choose from existing 180+ dish images --</option>
+                        {Object.keys(allImagesByFolder).map(folder => (
+                          <optgroup key={folder} label={folder}>
+                            {(allImagesByFolder[folder] || []).map((img, idx) => (
+                              <option key={idx} value={img.path}>
+                                {img.filename} ({folder})
+                              </option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* URL Input */}
+                  {newDish.imageSource === 'url' && (
+                    <input
+                      type="text"
+                      placeholder="https://images.unsplash.com/photo-..."
+                      value={newDish.image}
+                      onChange={(e) => setNewDish({ ...newDish, image: e.target.value })}
+                      className="w-full bg-primary-light/40 border border-gold/20 rounded-xl px-4 py-2.5 text-white font-sans text-sm focus:border-gold outline-none"
+                    />
+                  )}
+
+                  {/* Preview Image thumbnail if available */}
+                  {newDish.image && (
+                    <div className="mt-3 flex items-center gap-3 bg-primary-light/30 p-2.5 rounded-xl border border-gold/20">
+                      <img src={newDish.image} alt="Preview" className="w-12 h-12 rounded-lg object-cover border border-gold/30" />
+                      <div className="text-xs text-gray-300 truncate flex-grow">
+                        <span className="text-gold font-bold block">Selected Image Preview</span>
+                        <span className="font-mono text-[10px] text-gray-400 truncate block">{newDish.image.slice(0, 50)}...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Footer Actions */}
+                <div className="pt-4 border-t border-gold/20 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddDishModal(false)}
+                    className="px-5 py-2.5 rounded-full text-xs font-bold bg-primary-dark border border-gold/30 text-gray-300 hover:text-white cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 rounded-full text-xs font-bold bg-gold hover:bg-gold-light text-primary-dark shadow-lg shadow-gold/20 transition-all cursor-pointer font-sans"
+                  >
+                    Add Dish to Menu
+                  </button>
+                </div>
+
+              </form>
             </motion.div>
           </motion.div>
         )}

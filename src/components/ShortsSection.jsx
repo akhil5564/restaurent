@@ -27,6 +27,13 @@ export default function ShortsSection() {
       tag: "Signature Dish",
       shortUrl: "https://youtube.com/shorts/RNF8jTSFEQg?feature=share",
       embedUrl: "https://www.youtube.com/embed/RNF8jTSFEQg"
+    },
+    {
+      id: "N10f7lSLuHw",
+      title: "Chef's Special Creation",
+      tag: "Must Try",
+      shortUrl: "https://youtube.com/shorts/N10f7lSLuHw?feature=share",
+      embedUrl: "https://www.youtube.com/embed/N10f7lSLuHw"
     }
   ];
 
@@ -73,7 +80,7 @@ export default function ShortsSection() {
         </div>
 
         {/* Shorts Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 max-w-7xl mx-auto">
           {shorts.map((item, index) => (
             <motion.div
               key={item.id}
