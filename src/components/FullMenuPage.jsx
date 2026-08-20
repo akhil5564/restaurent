@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Leaf, Flame, Utensils, Search, Sparkles, Milk, MapPin, X, HelpCircle, Camera, Check, Save, Image as ImageIcon, Sliders, Plus, Upload, PlusCircle } from 'lucide-react';
+import { Leaf, Flame, Utensils, Search, Sparkles, Milk, MapPin, X, HelpCircle, Camera, Check, Save, Image as ImageIcon, Sliders, Plus, Upload, PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { menuData as initialMenuData } from '../data/menuData';
 import { allImagesByFolder } from '../data/allImagesData';
@@ -118,6 +118,42 @@ export default function FullMenuPage() {
       }
     } catch (err) {
       setSaveMessage('Dish added to menu!');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Delete / Remove Dish from menu
+  const handleDeleteDish = async (catId, itemIndex, dishName) => {
+    if (!window.confirm(`Are you sure you want to remove "${dishName}" from the menu?`)) {
+      return;
+    }
+
+    const updatedData = { ...currentMenuData };
+    if (updatedData[catId]) {
+      updatedData[catId] = updatedData[catId].filter((_, idx) => idx !== itemIndex);
+    }
+
+    setCurrentMenuData(updatedData);
+
+    // Save changes automatically to menuData.js
+    setIsSaving(true);
+    setSaveMessage('');
+    try {
+      const res = await fetch('/api/save-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menuData: updatedData }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveMessage(`✓ Dish "${dishName}" deleted & menu updated!`);
+        setTimeout(() => setSaveMessage(''), 4500);
+      } else {
+        setSaveMessage('Dish removed from menu page!');
+      }
+    } catch (err) {
+      setSaveMessage('Dish removed from menu page!');
     } finally {
       setIsSaving(false);
     }
@@ -448,6 +484,16 @@ export default function FullMenuPage() {
                         <Sparkles className="w-3 h-3 text-gold-accent" /> Signature
                       </div>
 
+                      {editMode && (
+                        <button
+                          onClick={() => handleDeleteDish(cat.id, itemIdx, item.name)}
+                          className="absolute top-2 left-2 z-30 bg-red-600 hover:bg-red-500 text-white p-1.5 rounded-full shadow-lg transition-all cursor-pointer"
+                          title={`Delete ${item.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+
                       <div className="relative h-56 w-full overflow-hidden rounded-xl mb-4 border border-gold/15 group">
                         {item.image ? (
                           <img 
@@ -586,9 +632,18 @@ export default function FullMenuPage() {
                         )}
 
                         {editMode && (
-                          <span className="text-[10px] font-mono text-gold/70 block truncate">
-                            {item.image || 'No image path'}
-                          </span>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] font-mono text-gold/70 block truncate">
+                              {item.image || 'No image path'}
+                            </span>
+                            <button
+                              onClick={() => handleDeleteDish(cat.id, itemIdx, item.name)}
+                              className="text-red-500 hover:text-red-400 p-1 hover:bg-red-500/10 rounded transition-all cursor-pointer ml-2 flex-shrink-0"
+                              title={`Remove ${item.name}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </motion.div>
@@ -688,15 +743,29 @@ export default function FullMenuPage() {
 
               {/* Modal Footer */}
               <div className="p-4 border-t border-gold/15 bg-primary-light/30 flex justify-between items-center">
-                <span className="text-xs text-gray-400">
-                  Current image: <code className="text-gold font-mono">{selectedDish.item.image || 'None'}</code>
-                </span>
                 <button
-                  onClick={() => setSelectedDish(null)}
-                  className="px-6 py-2.5 rounded-full text-xs font-bold bg-primary-dark border border-gold/30 text-white hover:bg-gold hover:text-primary-dark transition-all"
+                  onClick={() => {
+                    const { catId, itemIndex, item } = selectedDish;
+                    setSelectedDish(null);
+                    handleDeleteDish(catId, itemIndex, item.name);
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 transition-all cursor-pointer"
                 >
-                  Close
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete This Dish
                 </button>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-gray-400 hidden sm:inline">
+                    Current image: <code className="text-gold font-mono">{selectedDish.item.image || 'None'}</code>
+                  </span>
+                  <button
+                    onClick={() => setSelectedDish(null)}
+                    className="px-6 py-2 rounded-full text-xs font-bold bg-primary-dark border border-gold/30 text-white hover:bg-gold hover:text-primary-dark transition-all cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
