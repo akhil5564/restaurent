@@ -28,7 +28,7 @@ export default function FloatingOrderSidebar() {
     },
     {
       name: "WhatsApp",
-      url: "https://wa.me/917045671111?text=Hi!%20I%20would%20like%20to%20place%20an%20order%20at%20Kanary%20Restaurant.",
+      url: "https://wa.me/917872225222?text=Hi!%20I%20would%20like%20to%20place%20an%20order%20at%20Kanary%20Restaurant.",
       color: "#25d366",
       glowColor: "rgba(37, 211, 102, 0.4)",
       icon: (

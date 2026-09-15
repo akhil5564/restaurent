@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, Users, User, Phone, CheckCircle, Send, MessageSquare, Mail, MapPin } from 'lucide-react';
+import { Calendar, Clock, Users, User, Phone, CheckCircle, Send, MessageSquare, MapPin } from 'lucide-react';
 
 export default function Reservation() {
   const [formData, setFormData] = useState({
@@ -61,34 +61,13 @@ Time: ${formData.time}
 Seating: ${formData.preference}
 Notes: ${formData.notes || 'None'}`;
     
-    // Route to the branch's specific phone number
-    let phoneNum = '917045671111'; // MG Road default
-    if (formData.branch === 'Ayyanthole Branch') {
-      phoneNum = '917045672222';
-    } else if (formData.branch === 'Koorkenchery Branch') {
-      phoneNum = '917045673333';
-    }
+    // Route to the enquiry WhatsApp phone number
+    const phoneNum = '917872225222';
     
     return `https://wa.me/${phoneNum}?text=${encodeURIComponent(message)}`;
   };
 
-  // Generate pre-filled Mailto link
-  const getMailLink = () => {
-    const subject = `Reservation Request - ${bookingRef}`;
-    const body = `Kanary Restaurant Reservation Details:
-------------------------------------------
-Reference Code: ${bookingRef}
-Selected Branch: ${formData.branch}
-Guest Name: ${formData.name}
-Phone Number: ${formData.phone}
-Number of Guests: ${formData.guests}
-Reservation Date: ${formData.date}
-Reservation Time: ${formData.time}
-Seating Preference: ${formData.preference}
-Special Notes: ${formData.notes || 'None'}`;
 
-    return `mailto:info@kanaryrestaurant.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
 
   const handleReset = () => {
     setFormData({
@@ -161,14 +140,14 @@ Special Notes: ${formData.notes || 'None'}`;
                   </div>
                   <div>
                     <h4 className="text-white font-bold text-sm">Need Help? Call Us</h4>
-                    <p className="text-gray-400 text-xs mt-0.5">Call +91 98765 43210 for immediate group bookings or event inquiries.</p>
+                    <p className="text-gray-400 text-xs mt-0.5">Call +91 78722 25222 for immediate group bookings or event inquiries.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-800 text-gray-400 text-xs">
-              <p className="italic">Note: Table bookings are held for a maximum of 15 minutes past the reserved slot. Dress code: Smart Casual.</p>
+              <p className="italic">Note: Table bookings are held for a maximum of 15 minutes past the reserved slot.</p>
             </div>
           </div>
 
@@ -234,7 +213,7 @@ Special Notes: ${formData.notes || 'None'}`;
                         required
                         value={formData.phone}
                         onChange={handleChange}
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 78722 25222"
                         className="w-full bg-primary-dark/80 border border-gold/20 rounded-xl px-4 py-3 text-white font-sans text-sm focus:outline-none focus:border-gold transition-colors"
                       />
                     </div>
@@ -359,7 +338,7 @@ Special Notes: ${formData.notes || 'None'}`;
                   <div className="space-y-2">
                     <h3 className="font-serif text-3xl font-bold text-white">Details Verified!</h3>
                     <p className="text-gray-300 text-sm">
-                      Your request has been compiled. Choose how to submit it for immediate confirmation:
+                      Your request has been compiled. Click below to submit via WhatsApp for immediate confirmation:
                     </p>
                   </div>
 
@@ -387,24 +366,16 @@ Special Notes: ${formData.notes || 'None'}`;
                     </div>
                   </div>
 
-                  {/* WhatsApp & Email Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                  {/* WhatsApp Submission Button */}
+                  <div className="max-w-md mx-auto">
                     <a
                       href={getWhatsAppLink()}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 bg-[#25D366] hover:bg-[#20ba59] text-white font-sans font-bold py-3.5 px-6 rounded-xl text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
+                      className="w-full bg-[#25D366] hover:bg-[#20ba59] text-white font-sans font-bold py-3.5 px-6 rounded-xl text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:-translate-y-0.5"
                     >
                       <MessageSquare className="w-4 h-4 fill-white" />
                       SEND WHATSAPP
-                    </a>
-                    
-                    <a
-                      href={getMailLink()}
-                      className="flex-1 bg-white hover:bg-gray-100 text-primary-dark font-sans font-bold py-3.5 px-6 rounded-xl text-sm tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-lg"
-                    >
-                      <Mail className="w-4 h-4" />
-                      SEND EMAIL
                     </a>
                   </div>
 

@@ -22,8 +22,8 @@ export default function About() {
           >
             <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-gold/20">
               <img 
-                src="/images/interior_1.png" 
-                alt="Kanary Restaurant Interior" 
+                src="/images/about_img.jpeg" 
+                alt="About Kanary Restaurant" 
                 className="w-full h-[32rem] object-cover hover:scale-105 transition-transform duration-700"
               />
             </div>

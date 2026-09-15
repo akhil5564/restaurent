@@ -40,7 +40,7 @@ export default function DocumentarySeries() {
     },
     {
       id: 4,
-      videoUrl: "/video/hero_bg.mp4",
+      videoUrl: "/video/kanary%20web%20v2.mp4",
       type: "local",
       thumbnail: "/images/doc_thumb_4.png",
       episodeNumber: "04",
@@ -50,7 +50,7 @@ export default function DocumentarySeries() {
     },
     {
       id: 5,
-      videoUrl: "/video/hero_bg1.mp4",
+      videoUrl: "/video/kanary%20web%20v3.mp4",
       type: "local",
       thumbnail: "/images/doc_thumb_5.png",
       episodeNumber: "05",

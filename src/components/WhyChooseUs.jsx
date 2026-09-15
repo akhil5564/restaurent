@@ -6,27 +6,27 @@ export default function WhyChooseUs() {
   const features = [
     {
       icon: Leaf,
-      title: 'Fresh Ingredients',
-      desc: 'We source fresh local produce daily and grind our signature Kerala spice blends in-house to preserve essential oils and natural flavors.',
+      title: 'Premium Ingredients',
+      desc: 'We use only the freshest local produce and high-quality meats, ensuring every dish bursts with authentic flavour.',
     },
     {
       icon: ChefHat,
-      title: 'Experienced Chefs',
-      desc: 'Our kitchen is helmed by culinary maestros with decades of experience preparing traditional Kerala stews, curries, and regional specialties.',
+      title: 'Expert Culinary Team',
+      desc: 'Our culinary team brings years of expertise in traditional Kerala cuisine, crafting each dish with precision and care.',
     },
     {
       icon: Users,
-      title: 'Family Friendly',
+      title: 'Warm Hospitality',
       desc: 'A warm, spacious, and inviting dining room designed to accommodate families and large groups comfortably with dedicated hospitality.',
     },
     {
       icon: Timer,
-      title: 'Fast Service',
+      title: 'Swift Service',
       desc: 'We respect your time. Our kitchen operations are optimized to ensure your meals are cooked fresh and served hot without unnecessary delays.',
     },
     {
       icon: ShieldCheck,
-      title: 'Hygienic Kitchen',
+      title: 'Uncompromising Hygiene',
       desc: 'We enforce strict 5-star safety protocols, utilizing state-of-the-art sanitization, pure filtered water, and spotless preparation surfaces.',
     },
   ];
@@ -49,7 +49,7 @@ export default function WhyChooseUs() {
     <section 
       id="why-us" 
       className="py-24 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/images/dining_experience.png')" }}
+      style={{ backgroundImage: "url('/images/parallax_img.jpeg')" }}
     >
       {/* Heavy dark luxury overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary-bg/85 via-primary-bg/50 to-primary-bg/85 pointer-events-none" />
@@ -115,7 +115,7 @@ export default function WhyChooseUs() {
                 <Calendar className="w-6 h-6" />
               </div>
               <h3 className="font-serif text-white text-xl font-bold">
-                Experience It Yourself
+                A Remarkable Experience
               </h3>
               <p className="text-gray-300 text-sm leading-relaxed">
                 Join us for lunch or dinner to taste the true legacy of premium multi-cuisine cooking. Reserve your table in seconds.

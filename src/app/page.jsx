@@ -1,6 +1,5 @@
 import Hero from '../components/Hero';
 import About from '../components/About';
-import DocumentarySeries from '../components/DocumentarySeries';
 import Menu from '../components/Menu';
 import Gallery from '../components/Gallery';
 import WhyChooseUs from '../components/WhyChooseUs';
@@ -22,22 +21,19 @@ export default function HomePage() {
       <section id="about">
         <About />
       </section>
+
       {/* Why Choose Us */}
       <section id="why-us">
         <WhyChooseUs />
       </section>
 
-
-      {/* Founder Documentary Series */}
-      <DocumentarySeries />
+      {/* YouTube Shorts Gallery */}
+      <ShortsSection />
 
       {/* Menu Highlights Section */}
       <section id="menu">
         <Menu />
       </section>
-
-      {/* YouTube Shorts Gallery */}
-      <ShortsSection />
 
       {/* Video Showcase & Stats Count Panel */}
       <PromoVideo />

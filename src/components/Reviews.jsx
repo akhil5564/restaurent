@@ -7,35 +7,35 @@ export default function Reviews() {
   const reviews = [
     {
       id: 1,
-      name: 'Rahul',
-      location: 'Kochi',
+      name: 'Jithu Shaju',
+      location: 'Ayyanthole Branch (Google Review)',
       rating: 5,
-      text: 'Amazing food and excellent ambience. The Kerala Fish Curry had the perfect balance of spices, and the service was exceptionally warm.',
-      initials: 'R',
+      text: 'I tried the mixed fried rice, beef curry, Al Fahm, Malabar Chicken Biryani and meals over 2 days. The mixed fried rice was really good, and the beef curry tasted authentic. Al Fahm was perfectly cooked and honestly one of the best dishes I’ve had recently in Thrissur!',
+      initials: 'J',
     },
     {
       id: 2,
-      name: 'Anjali',
-      location: 'Trivandrum',
+      name: 'The Awkward Curry Pot',
+      location: 'M.G. Road Branch (Google Review)',
       rating: 5,
-      text: 'Best restaurant experience in town. Every dish tasted fresh and authentic. The chocolate brownie dessert was the perfect end to our family dinner.',
+      text: 'A hidden gem that deserves more attention! Stopped here for a quick tea break and stayed longer than expected. Excellent tea, calm & cosy atmosphere, courteous staff, and a great variety of dishes including tandoori items!',
       initials: 'A',
     },
     {
       id: 3,
-      name: 'Vikram',
-      location: 'Bangalore',
+      name: 'Jeevan Jose Kalan',
+      location: 'Koorkenchery Branch (Google Review)',
       rating: 5,
-      text: 'The Garlic Prawns were sizzling and cooked to perfection. Truly authentic taste of southern coastal cuisine. Will definitely visit again!',
-      initials: 'V',
+      text: 'Went around 11 PM for a quick bite. A2 Ghee Paneer Butter Masala Dosa was served hot and savoured with 4 delicious side dishes. Service was quick and cordial!',
+      initials: 'J',
     },
     {
       id: 4,
-      name: 'Meera',
-      location: 'Kochi',
+      name: 'Kiran Varghese',
+      location: 'Thrissur (Google Review)',
       rating: 5,
-      text: 'A very clean and family-friendly environment. The chefs are masters of their craft—you can tell they grind their own spices. Five stars!',
-      initials: 'M',
+      text: 'Outstanding authentic Kerala culinary flavors combined with quick service. The ambience at Kanary Feast is top-tier for family dining and weekend dinners.',
+      initials: 'K',
     },
   ];
 
@@ -80,7 +80,7 @@ export default function Reviews() {
     <section 
       id="reviews" 
       className="py-24 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
-      style={{ backgroundImage: "url('/images/dining_experience.png')" }}
+      style={{ backgroundImage: "url('/images/parallax_img.jpeg')" }}
     >
       {/* Heavy dark luxury overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary-bg/50 via-primary-bg/20 to-primary-bg/50 pointer-events-none" />

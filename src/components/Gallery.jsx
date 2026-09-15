@@ -15,7 +15,7 @@ export default function Gallery() {
       desc: 'Cooked slowly in traditional clay pots with kudampuli and fresh coconut.'
     },
     {
-      src: '/images/interior_1.png',
+      src: '/images/parallax_img.jpeg',
       title: 'Warm Ambience',
       tag: 'Fine Dining Room',
       desc: 'Elegant forest green decor, custom gold fixtures, and cozy booth seating.'
@@ -33,7 +33,7 @@ export default function Gallery() {
       desc: 'Sizzling prawns cooked in white butter, herbs, and caramelized garlic.'
     },
     {
-      src: '/images/dining_experience.png',
+      src: '/images/about_img.jpeg',
       title: 'Dining Experience',
       tag: 'Family & Friends',
       desc: 'Sharing smiles and authentic food in a welcoming, luxurious environment.'

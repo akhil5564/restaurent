@@ -12,33 +12,33 @@ export default function Contact() {
       name: 'M.G. Road Branch',
       tagline: 'Flagship Restaurant',
       address: 'Brahmaswom Madam Building, MG Road, Thrissur, Kerala - 680001',
-      phone: '+91 70456 71111',
-      phoneLink: 'tel:+917045671111',
+      phone: '+91 78722 25222',
+      phoneLink: 'tel:+917872225222',
       mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3922.59345719908!2d76.21272717596001!3d10.524816989609272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7ee3bd1987d69%3A0x6d97c555d496a792!2sKanary%20Restaurant!5e0!3m2!1sen!2sin!4v1718544000000!5m2!1sen!2sin',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+MG+Road+Thrissur',
-      hours: 'Monday – Sunday: 8:00 AM – 1:00 AM'
+      hours: 'Monday – Sunday: 11:00 AM – 1:00 AM'
     },
     {
       id: 1,
       name: 'Ayyanthole Branch',
       tagline: 'Civil Line Link Road',
       address: 'Civil Line Link Road, Ayyanthole, Thrissur, Kerala - 680003',
-      phone: '+91 70456 72222',
-      phoneLink: 'tel:+917045672222',
+      phone: '+91 78722 25222',
+      phoneLink: 'tel:+917872225222',
       mapEmbedUrl: 'https://maps.google.com/maps?q=Kanary%20Restaurant%20Civil%20Line%20Link%20Road%20Ayyanthole%20Thrissur&t=&z=15&ie=UTF8&iwloc=&output=embed',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+Civil+Line+Link+Road+Ayyanthole+Thrissur',
-      hours: 'Monday – Sunday: 10:00 AM – 11:30 PM'
+      hours: 'Monday – Sunday: 11:00 AM – 11:00 PM'
     },
     {
       id: 2,
       name: 'Koorkenchery Branch',
       tagline: 'AVM Tower',
       address: 'AVM Tower, Koorkenchery, Thrissur, Kerala - 680007',
-      phone: '+91 70456 73333',
-      phoneLink: 'tel:+917045673333',
+      phone: '+91 78722 25222',
+      phoneLink: 'tel:+917872225222',
       mapEmbedUrl: 'https://maps.google.com/maps?q=Kanary%20Restaurant%20AVM%20Tower%20Koorkenchery%20Thrissur&t=&z=15&ie=UTF8&iwloc=&output=embed',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+AVM+Tower+Koorkenchery+Thrissur',
-      hours: 'Monday – Sunday: 11:00 AM – 11:00 PM'
+      hours: 'Monday – Sunday: 11:00 AM – 1:00 AM'
     }
   ];
 
@@ -48,7 +48,7 @@ export default function Contact() {
     <section 
       id="contact" 
       className="py-24 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed animate-fade-in"
-      style={{ backgroundImage: "url('/images/dining_experience.png')" }}
+      style={{ backgroundImage: "url('/images/parallax_img.jpeg')" }}
     >
       {/* Heavy dark luxury overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary-bg/70 via-primary-bg/35 to-primary-bg/70 pointer-events-none" />
@@ -151,8 +151,8 @@ export default function Contact() {
                     <Mail className="w-4 h-4" />
                     <span className="text-[10px] font-sans font-bold uppercase tracking-wider">Email</span>
                   </div>
-                  <a href="mailto:info@kanaryrestaurant.com" className="text-xs sm:text-sm text-white hover:text-gold transition-colors font-sans truncate">
-                    info@kanaryrestaurant.com
+                  <a href="mailto:Kanarykafe@gmail.com" className="text-xs sm:text-sm text-white hover:text-gold transition-colors font-sans truncate">
+                    Kanarykafe@gmail.com
                   </a>
                 </div>
                 

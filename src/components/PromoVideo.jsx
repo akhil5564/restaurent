@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, animate } from 'framer-motion';
-import { Play, X, Utensils, Award, ChefHat, Users } from 'lucide-react';
+import { Play, X, Utensils, ChefHat, Users } from 'lucide-react';
 
 function AnimatedCounter({ value, suffix }) {
   const ref = useRef(null);
@@ -46,7 +46,7 @@ export default function PromoVideo() {
       label: 'Special Foods',
       icon: ChefHat,
     },
-   {
+    {
       id: 4,
       count: 15,
       suffix: '+',
@@ -56,7 +56,7 @@ export default function PromoVideo() {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden bg-primary-bg">
+    <section className="py-24 relative overflow-hidden bg-primary-bg border-t border-white/5">
       {/* Ambient luxury light glow behind play button */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gold/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -100,7 +100,7 @@ export default function PromoVideo() {
           <div className="w-[1px] h-20 bg-gradient-to-b from-gold/60 via-gold/30 to-transparent my-8" />
         </div>
 
-        {/* Minimalist Stats Counters (No cards, flat horizontal layout) */}
+        {/* Minimalist Stats Counters */}
         <div className="grid grid-cols-3 gap-4 md:gap-8 items-center justify-center max-w-3xl mx-auto">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
