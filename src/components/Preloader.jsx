@@ -43,12 +43,12 @@ export default function Preloader() {
             KANARY
           </motion.h1>
           <motion.span 
-            className="font-sans text-xs font-semibold tracking-[0.25em] text-gold uppercase block"
+            className="font-sans text-xs font-bold tracking-[0.25em] text-gold uppercase block"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            RESTAURANT
+            GROUP OF RESTAURANTS
           </motion.span>
         </div>
 

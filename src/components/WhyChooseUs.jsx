@@ -6,8 +6,8 @@ export default function WhyChooseUs() {
   const features = [
     {
       icon: Leaf,
-      title: 'Premium Ingredients',
-      desc: 'We use only the freshest local produce and high-quality meats, ensuring every dish bursts with authentic flavour.',
+      title: 'Pure A2 Milk & Ghee',
+      desc: 'Made from A2 milk sourced from cows that naturally produce A2 beta-casein, bringing together traditional dairy goodness, rich taste, and premium quality.',
     },
     {
       icon: ChefHat,

@@ -2,7 +2,7 @@ import './globals.css';
 import ClientLayoutWrapper from './ClientLayoutWrapper';
 
 export const metadata = {
-  title: 'Kanary Restaurant | Fine Indian & Global Dining',
+  title: 'Kanary Group of Restaurants | Fine Indian & Global Dining',
   description: "Experience premium culinary dining in Thrissur. Book your table online and view our complete gourmet food and drinks menu, prepared with authentic ingredients.",
   icons: {
     icon: '/favicon.svg',

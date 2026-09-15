@@ -56,8 +56,25 @@ export default function About() {
             </div>
 
             <p className="font-sans text-gray-300 text-base sm:text-lg leading-relaxed">
-              Kanary Restaurant has been Thrissur's premier multi-cuisine dining destination since 2022. Known for our rich flavors and uncompromising quality, we take pride in using premium, wholesome ingredients like pure A2 milk and A2 ghee to elevate our traditional recipes.
+              Kanary Group of Restaurants has been Thrissur's premier multi-cuisine dining destination since 2022. Known for our rich flavors and uncompromising quality, we take pride in using premium, wholesome ingredients to elevate our traditional recipes.
             </p>
+
+            {/* Glowing A2 Milk & Ghee Luxury Highlight Banner */}
+            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-gold/20 via-gold/10 to-primary-dark/80 border border-gold/40 shadow-[0_4px_30px_rgba(212,175,55,0.2)] relative overflow-hidden">
+              <div className="flex items-start gap-4 relative z-10">
+                <div className="w-11 h-11 rounded-xl bg-gold text-primary-dark flex items-center justify-center flex-shrink-0 shadow-lg font-bold text-base">
+                  A2
+                </div>
+                <div className="space-y-1.5">
+                  <span className="text-gold font-sans font-bold text-xs uppercase tracking-widest block">
+                    ✨ PURE A2 MILK & GHEE GUARANTEE
+                  </span>
+                  <p className="font-serif text-white text-sm sm:text-base italic leading-relaxed">
+                    “Made from A2 milk sourced from cows that naturally produce A2 beta-casein, our milk and ghee bring together traditional dairy goodness, rich taste, and premium quality.”
+                  </p>
+                </div>
+              </div>
+            </div>
 
             <p className="font-sans text-gray-400 text-sm sm:text-base leading-relaxed">
               Nestled in the cultural capital of Kerala, Thrissur (with branches at MG Road, Koorkenchery, and Ayyanthole), we offer an immersive culinary journey. From traditional Malabar spices to global Continental plates, our chefs prepare every meal with pure dedication.

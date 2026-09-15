@@ -73,8 +73,8 @@ export default function Footer() {
                 <span className="font-serif text-xl sm:text-2xl font-bold tracking-wide text-white group-hover:text-gold transition-colors duration-300">
                   KANARY
                 </span>
-                <span className="text-[10px] tracking-[0.25em] text-gold uppercase -mt-1 font-sans">
-                  Restaurant
+                <span className="text-[10px] tracking-[0.2em] font-bold text-gold uppercase -mt-1 font-sans">
+                  GROUP OF RESTAURANTS
                 </span>
               </div>
             </a>
@@ -136,7 +136,7 @@ export default function Footer() {
         {/* Bottom copyright and policies */}
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>
-            Copyright ©️ 2026 Kanary Restaurant. All rights reserved.
+            Copyright ©️ 2026 Kanary Group of Restaurants. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#privacy" className="hover:text-gold transition-colors">Privacy Policy</a>
