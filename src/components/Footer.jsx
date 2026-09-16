@@ -9,7 +9,7 @@ export default function Footer() {
           <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.75z"/>
         </svg>
       ), 
-      href: 'https://www.facebook.com/KanaryRestaurant', 
+      href: 'https://www.facebook.com/kanarykafe/', 
       label: 'Facebook' 
     },
     { 
@@ -20,7 +20,7 @@ export default function Footer() {
           <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       ), 
-      href: 'https://www.instagram.com/kanary_restaurant', 
+      href: 'https://www.instagram.com/kanaryrestaurant?stkn=Mm51ZzQyOW4wczF1', 
       label: 'Instagram' 
     },
     { 
@@ -38,7 +38,7 @@ export default function Footer() {
           <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.518 3.545 12 3.545 12 3.545s-7.518 0-9.388.507a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.87.507 9.388.507 9.388.507s7.518 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
         </svg>
       ), 
-      href: 'https://www.youtube.com/results?search_query=Kanary+Restaurant+Thrissur', 
+      href: 'https://www.youtube.com/@KanaryRestaurant', 
       label: 'Youtube' 
     },
   ];

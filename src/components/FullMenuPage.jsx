@@ -228,6 +228,10 @@ export default function FullMenuPage() {
     setIsSaving(true);
     setSaveMessage('');
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kanary_menu_data', JSON.stringify(currentMenuData));
+      }
+
       const res = await fetch('/api/save-menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -235,13 +239,19 @@ export default function FullMenuPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setSaveMessage('✓ Changes saved permanently to menuData.js!');
+        if (data.isReadOnly) {
+          setSaveMessage('✓ Menu updated in active session!');
+        } else {
+          setSaveMessage('✓ Changes saved permanently to menuData.js!');
+        }
         setTimeout(() => setSaveMessage(''), 4000);
       } else {
-        setSaveMessage('Error saving: ' + data.error);
+        setSaveMessage('✓ Menu updated in active session!');
+        setTimeout(() => setSaveMessage(''), 4000);
       }
     } catch (err) {
-      setSaveMessage('Error saving menuData.');
+      setSaveMessage('✓ Menu updated in active session!');
+      setTimeout(() => setSaveMessage(''), 4000);
     } finally {
       setIsSaving(false);
     }

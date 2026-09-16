@@ -6,8 +6,8 @@ export default function WhyChooseUs() {
   const features = [
     {
       icon: Leaf,
-      title: 'Pure A2 Milk & Ghee',
-      desc: 'Made from A2 milk sourced from cows that naturally produce A2 beta-casein, bringing together traditional dairy goodness, rich taste, and premium quality.',
+      title: 'Premium Ingredients',
+      desc: 'We source fresh ,local produce daily and grind our signature Kerala spice blends in-house to preserve essential oils and natural flavors.',
     },
     {
       icon: ChefHat,

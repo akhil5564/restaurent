@@ -1,33 +1,11 @@
 "use client";
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function Hero() {
   const router = useRouter();
-  const [activeHeroAngle, setActiveHeroAngle] = useState(0);
-
-  const heroVideos = [
-    { label: "Angle 1", name: "View 1", src: "/video/kanary%20web%20v1.mp4" },
-    { label: "Angle 2", name: "View 2", src: "/video/kanary%20web%20v2.mp4" },
-    { label: "Angle 3", name: "View 3", src: "/video/kanary%20web%20v3.mp4" }
-  ];
-
-  const currentHeroVideo = heroVideos[activeHeroAngle].src;
-
-  // Auto-rotate background video angles automatically every 8 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveHeroAngle((prev) => (prev + 1) % heroVideos.length);
-    }, 8000);
-
-    return () => clearInterval(timer);
-  }, [heroVideos.length]);
-
-  const handleVideoEnded = () => {
-    setActiveHeroAngle((prev) => (prev + 1) % heroVideos.length);
-  };
 
   const handleScrollTo = (id) => {
     if (id.startsWith('/')) {
@@ -42,22 +20,16 @@ export default function Hero() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-      {/* Background Video with Dark Premium Overlays (Stacked 1.5s Crossfade) */}
+      {/* Background Video with Dark Premium Overlays */}
       <div className="absolute inset-0 overflow-hidden bg-black">
-        {heroVideos.map((video, idx) => (
-          <motion.video
-            key={video.src}
-            autoPlay
-            loop
-            muted
-            playsInline
-            src={video.src}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: activeHeroAngle === idx ? 1 : 0 }}
-            transition={{ duration: 1.5, ease: "easeInOut" }}
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          />
-        ))}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          src="/video/kanary%20web%20v1.mp4"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-primary-bg/80 via-primary-bg/50 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-t from-primary-bg/70 via-transparent to-primary-bg/30 pointer-events-none" />
       </div>

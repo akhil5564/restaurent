@@ -12,8 +12,8 @@ export default function Contact() {
       name: 'M.G. Road Branch',
       tagline: 'Flagship Restaurant',
       address: 'Brahmaswom Madam Building, MG Road, Thrissur, Kerala - 680001',
-      phone: '+91 78722 25222',
-      phoneLink: 'tel:+917872225222',
+      phone: '+91 70456 71111',
+      phoneLink: 'tel:+917045671111',
       mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3922.59345719908!2d76.21272717596001!3d10.524816989609272!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7ee3bd1987d69%3A0x6d97c555d496a792!2sKanary%20Restaurant!5e0!3m2!1sen!2sin!4v1718544000000!5m2!1sen!2sin',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+MG+Road+Thrissur',
       hours: 'Monday – Sunday: 11:00 AM – 1:00 AM'
@@ -23,8 +23,8 @@ export default function Contact() {
       name: 'Ayyanthole Branch',
       tagline: 'Civil Line Link Road',
       address: 'Civil Line Link Road, Ayyanthole, Thrissur, Kerala - 680003',
-      phone: '+91 78722 25222',
-      phoneLink: 'tel:+917872225222',
+      phone: '+91 70456 72222',
+      phoneLink: 'tel:+917045672222',
       mapEmbedUrl: 'https://maps.google.com/maps?q=Kanary%20Restaurant%20Civil%20Line%20Link%20Road%20Ayyanthole%20Thrissur&t=&z=15&ie=UTF8&iwloc=&output=embed',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+Civil+Line+Link+Road+Ayyanthole+Thrissur',
       hours: 'Monday – Sunday: 11:00 AM – 11:00 PM'
@@ -34,8 +34,8 @@ export default function Contact() {
       name: 'Koorkenchery Branch',
       tagline: 'AVM Tower',
       address: 'AVM Tower, Koorkenchery, Thrissur, Kerala - 680007',
-      phone: '+91 78722 25222',
-      phoneLink: 'tel:+917872225222',
+      phone: '+91 70456 73333',
+      phoneLink: 'tel:+917045673333',
       mapEmbedUrl: 'https://maps.google.com/maps?q=Kanary%20Restaurant%20AVM%20Tower%20Koorkenchery%20Thrissur&t=&z=15&ie=UTF8&iwloc=&output=embed',
       directionsUrl: 'https://maps.google.com/?q=Kanary+Restaurant+AVM+Tower+Koorkenchery+Thrissur',
       hours: 'Monday – Sunday: 11:00 AM – 1:00 AM'
