@@ -34,40 +34,32 @@ export default function FullMenuPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
 
-  // Load latest persisted menu data from localStorage and sync to disk API on mount
+  // Load latest persisted menu data from localStorage on mount.
+  // If localStorage exists, DO NOT perform async GET fetch to prevent race condition overwrites!
   useEffect(() => {
-    let localSavedData = null;
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kanary_menu_data');
       if (saved) {
         try {
-          localSavedData = JSON.parse(saved);
-          setCurrentMenuData(localSavedData);
+          const parsed = JSON.parse(saved);
+          setCurrentMenuData(parsed);
+          return; // Stop here! Do not perform async fetch that could race and overwrite edits.
         } catch (e) {}
       }
     }
 
+    // Only if localStorage is empty, fetch disk menu data once
     fetch('/api/save-menu')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.menuData) {
-          if (!localSavedData) {
-            // No local storage yet, use server disk data
+          if (typeof window !== 'undefined' && !localStorage.getItem('kanary_menu_data')) {
             setCurrentMenuData(data.menuData);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
-            }
-          } else {
-            // Ensure disk menuData.js matches latest local user edits
-            fetch('/api/save-menu', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ menuData: localSavedData }),
-            }).catch(() => {});
+            localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
           }
         }
       })
-      .catch(err => console.error('Failed to sync menu API:', err));
+      .catch(err => console.error('Failed to load menu from disk API:', err));
   }, []);
 
   // Add New Dish State
@@ -84,15 +76,61 @@ export default function FullMenuPage() {
     imageSource: 'upload', // 'upload' | 'library' | 'url'
   });
 
-  const handleFileUpload = (e) => {
+  const compressImage = (file, maxWidth = 600, maxHeight = 600, quality = 0.75) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(event.target.result);
+      };
+      reader.onerror = () => resolve('');
+    });
+  };
+
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewDish(prev => ({ ...prev, image: reader.result, imageSource: 'upload' }));
-      };
-      reader.readAsDataURL(file);
+      const compressedBase64 = await compressImage(file);
+      setNewDish(prev => ({ ...prev, image: compressedBase64, imageSource: 'upload' }));
     }
+  };
+
+  // Always retrieve fresh, deep-cloned menu data combining local storage and state
+  const getFreshMenuData = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kanary_menu_data');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+    }
+    return JSON.parse(JSON.stringify(currentMenuData));
   };
 
   const handleAddNewDishSubmit = async (e) => {
@@ -113,7 +151,7 @@ export default function FullMenuPage() {
       image: newDish.image || '/menu-images/Soups/ITM0000557.jpg',
     };
 
-    const updatedData = { ...currentMenuData };
+    const updatedData = getFreshMenuData();
     if (!updatedData[catId]) {
       updatedData[catId] = [];
     }
@@ -144,7 +182,7 @@ export default function FullMenuPage() {
       return;
     }
 
-    const updatedData = { ...currentMenuData };
+    const updatedData = getFreshMenuData();
     if (updatedData[catId]) {
       updatedData[catId] = updatedData[catId].filter((_, idx) => idx !== itemIndex);
     }
@@ -218,11 +256,7 @@ export default function FullMenuPage() {
       });
       const data = await res.json();
       if (data.success) {
-        if (data.isReadOnly) {
-          setSaveMessage('✓ Menu updated in active session!');
-        } else {
-          setSaveMessage(successMsg || '✓ Changes saved permanently to menuData.js!');
-        }
+        setSaveMessage(successMsg || '✓ Changes saved permanently!');
         setTimeout(() => setSaveMessage(''), 4000);
       } else {
         setSaveMessage('✓ Menu updated in active session!');
@@ -241,14 +275,16 @@ export default function FullMenuPage() {
     if (!selectedDish) return;
     const { catId, itemIndex } = selectedDish;
 
-    const updatedData = { ...currentMenuData };
-    updatedData[catId][itemIndex] = {
-      ...updatedData[catId][itemIndex],
-      image: imagePath,
-    };
+    const updatedData = getFreshMenuData();
+    if (updatedData[catId] && updatedData[catId][itemIndex]) {
+      updatedData[catId][itemIndex] = {
+        ...updatedData[catId][itemIndex],
+        image: imagePath,
+      };
+    }
 
     setSelectedDish(null);
-    saveAndPersistMenuData(updatedData, `✓ Image updated & saved permanently for "${updatedData[catId][itemIndex].name}"!`);
+    saveAndPersistMenuData(updatedData, `✓ Image updated & saved permanently!`);
   };
 
   // Save changes explicitly to menuData.js

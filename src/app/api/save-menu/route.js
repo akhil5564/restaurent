@@ -29,21 +29,28 @@ export async function POST(request) {
     }
 
     const filePath = path.join(process.cwd(), 'src', 'data', 'menuData.js');
+    const tempPath = path.join(process.cwd(), 'src', 'data', 'menuData.js.tmp');
     const content = 'export const menuData = ' + JSON.stringify(menuData, null, 2) + ';\n';
     
     try {
-      fs.writeFileSync(filePath, content, 'utf8');
+      // Atomic write: write to temp file first then atomic rename to avoid race conditions
+      fs.writeFileSync(tempPath, content, 'utf8');
+      fs.renameSync(tempPath, filePath);
       return NextResponse.json({ success: true, isReadOnly: false, message: 'menuData.js updated successfully!' });
     } catch (fsError) {
-      // If deployed on read-only serverless environments (e.g., Vercel / DigitalOcean / AWS Lambda)
-      if (fsError.code === 'EROFS' || (fsError.message && fsError.message.includes('read-only'))) {
-        return NextResponse.json({ 
-          success: true, 
-          isReadOnly: true, 
-          message: 'Menu updated in active session (Read-only cloud environment)' 
-        });
+      try {
+        fs.writeFileSync(filePath, content, 'utf8');
+        return NextResponse.json({ success: true, isReadOnly: false, message: 'menuData.js updated successfully!' });
+      } catch (err2) {
+        if (err2.code === 'EROFS' || (err2.message && err2.message.includes('read-only'))) {
+          return NextResponse.json({ 
+            success: true, 
+            isReadOnly: true, 
+            message: 'Menu updated in active session (Read-only cloud environment)' 
+          });
+        }
+        throw err2;
       }
-      throw fsError;
     }
   } catch (error) {
     console.error('Error saving menuData:', error);

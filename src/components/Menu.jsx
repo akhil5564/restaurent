@@ -10,13 +10,13 @@ export default function Menu() {
   const [currentMenuData, setCurrentMenuData] = useState(initialMenuData);
 
   useEffect(() => {
-    let localSavedData = null;
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kanary_menu_data');
       if (saved) {
         try {
-          localSavedData = JSON.parse(saved);
-          setCurrentMenuData(localSavedData);
+          const parsed = JSON.parse(saved);
+          setCurrentMenuData(parsed);
+          return;
         } catch (e) {}
       }
     }
@@ -24,8 +24,10 @@ export default function Menu() {
     fetch('/api/save-menu')
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.menuData && !localSavedData) {
-          setCurrentMenuData(data.menuData);
+        if (data.success && data.menuData) {
+          if (typeof window !== 'undefined' && !localStorage.getItem('kanary_menu_data')) {
+            setCurrentMenuData(data.menuData);
+          }
         }
       })
       .catch(err => console.error(err));
