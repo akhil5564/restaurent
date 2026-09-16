@@ -2,6 +2,25 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+export async function GET() {
+  try {
+    const filePath = path.join(process.cwd(), 'src', 'data', 'menuData.js');
+    if (fs.existsSync(filePath)) {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const start = fileContent.indexOf('{');
+      const end = fileContent.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        const jsonStr = fileContent.substring(start, end + 1);
+        const menuData = JSON.parse(jsonStr);
+        return NextResponse.json({ success: true, menuData });
+      }
+    }
+  } catch (err) {
+    console.error('GET menu error:', err);
+  }
+  return NextResponse.json({ success: false, error: 'Could not read menu file' }, { status: 500 });
+}
+
 export async function POST(request) {
   try {
     const { menuData } = await request.json();

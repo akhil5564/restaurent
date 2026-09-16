@@ -34,6 +34,42 @@ export default function FullMenuPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
 
+  // Load latest persisted menu data from localStorage and sync to disk API on mount
+  useEffect(() => {
+    let localSavedData = null;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kanary_menu_data');
+      if (saved) {
+        try {
+          localSavedData = JSON.parse(saved);
+          setCurrentMenuData(localSavedData);
+        } catch (e) {}
+      }
+    }
+
+    fetch('/api/save-menu')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.menuData) {
+          if (!localSavedData) {
+            // No local storage yet, use server disk data
+            setCurrentMenuData(data.menuData);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
+            }
+          } else {
+            // Ensure disk menuData.js matches latest local user edits
+            fetch('/api/save-menu', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ menuData: localSavedData }),
+            }).catch(() => {});
+          }
+        }
+      })
+      .catch(err => console.error('Failed to sync menu API:', err));
+  }, []);
+
   // Add New Dish State
   const [showAddDishModal, setShowAddDishModal] = useState(false);
   const [newDish, setNewDish] = useState({
@@ -84,7 +120,6 @@ export default function FullMenuPage() {
     // Add new dish at beginning of chosen category
     updatedData[catId] = [dishObj, ...updatedData[catId]];
 
-    setCurrentMenuData(updatedData);
     setShowAddDishModal(false);
 
     // Reset form
@@ -100,27 +135,7 @@ export default function FullMenuPage() {
       imageSource: 'upload',
     });
 
-    // Auto save to menuData.js
-    setIsSaving(true);
-    setSaveMessage('');
-    try {
-      const res = await fetch('/api/save-menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ menuData: updatedData }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSaveMessage(`✓ New dish "${dishObj.name}" added & saved permanently!`);
-        setTimeout(() => setSaveMessage(''), 4500);
-      } else {
-        setSaveMessage('Dish added to menu!');
-      }
-    } catch (err) {
-      setSaveMessage('Dish added to menu!');
-    } finally {
-      setIsSaving(false);
-    }
+    saveAndPersistMenuData(updatedData, `✓ New dish "${dishObj.name}" added & saved permanently!`);
   };
 
   // Delete / Remove Dish from menu
@@ -134,29 +149,7 @@ export default function FullMenuPage() {
       updatedData[catId] = updatedData[catId].filter((_, idx) => idx !== itemIndex);
     }
 
-    setCurrentMenuData(updatedData);
-
-    // Save changes automatically to menuData.js
-    setIsSaving(true);
-    setSaveMessage('');
-    try {
-      const res = await fetch('/api/save-menu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ menuData: updatedData }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSaveMessage(`✓ Dish "${dishName}" deleted & menu updated!`);
-        setTimeout(() => setSaveMessage(''), 4500);
-      } else {
-        setSaveMessage('Dish removed from menu page!');
-      }
-    } catch (err) {
-      setSaveMessage('Dish removed from menu page!');
-    } finally {
-      setIsSaving(false);
-    }
+    saveAndPersistMenuData(updatedData, `✓ Dish "${dishName}" deleted & saved!`);
   };
 
   const tabsRef = useRef(null);
@@ -208,41 +201,27 @@ export default function FullMenuPage() {
     }
   };
 
-  // Assign selected image to current dish
-  const handleAssignImage = (imagePath) => {
-    if (!selectedDish) return;
-    const { catId, itemIndex } = selectedDish;
-
-    const updatedData = { ...currentMenuData };
-    updatedData[catId][itemIndex] = {
-      ...updatedData[catId][itemIndex],
-      image: imagePath,
-    };
-
+  // Unified Helper to update state, sync to localStorage, and persist to menuData.js via API
+  const saveAndPersistMenuData = async (updatedData, successMsg = '✓ Changes saved!') => {
     setCurrentMenuData(updatedData);
-    setSelectedDish(null);
-  };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('kanary_menu_data', JSON.stringify(updatedData));
+    }
 
-  // Save changes to menuData.js via API route
-  const handleSaveChanges = async () => {
     setIsSaving(true);
     setSaveMessage('');
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('kanary_menu_data', JSON.stringify(currentMenuData));
-      }
-
       const res = await fetch('/api/save-menu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ menuData: currentMenuData }),
+        body: JSON.stringify({ menuData: updatedData }),
       });
       const data = await res.json();
       if (data.success) {
         if (data.isReadOnly) {
           setSaveMessage('✓ Menu updated in active session!');
         } else {
-          setSaveMessage('✓ Changes saved permanently to menuData.js!');
+          setSaveMessage(successMsg || '✓ Changes saved permanently to menuData.js!');
         }
         setTimeout(() => setSaveMessage(''), 4000);
       } else {
@@ -255,6 +234,26 @@ export default function FullMenuPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Assign selected image to current dish
+  const handleAssignImage = (imagePath) => {
+    if (!selectedDish) return;
+    const { catId, itemIndex } = selectedDish;
+
+    const updatedData = { ...currentMenuData };
+    updatedData[catId][itemIndex] = {
+      ...updatedData[catId][itemIndex],
+      image: imagePath,
+    };
+
+    setSelectedDish(null);
+    saveAndPersistMenuData(updatedData, `✓ Image updated & saved permanently for "${updatedData[catId][itemIndex].name}"!`);
+  };
+
+  // Save changes explicitly to menuData.js
+  const handleSaveChanges = async () => {
+    await saveAndPersistMenuData(currentMenuData, '✓ Changes saved permanently to menuData.js!');
   };
 
   // Helper to filter items based on search query and selected filter type

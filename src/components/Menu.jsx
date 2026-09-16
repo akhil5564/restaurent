@@ -3,11 +3,36 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Award, Flame, Leaf, BookOpen } from 'lucide-react';
 
-import { menuData } from '../data/menuData';
+import { useState, useEffect } from 'react';
+import { menuData as initialMenuData } from '../data/menuData';
 
 export default function Menu() {
-  // Use all items from chefSpecials
-  const specialties = menuData.chefSpecials.map((item, index) => ({
+  const [currentMenuData, setCurrentMenuData] = useState(initialMenuData);
+
+  useEffect(() => {
+    let localSavedData = null;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('kanary_menu_data');
+      if (saved) {
+        try {
+          localSavedData = JSON.parse(saved);
+          setCurrentMenuData(localSavedData);
+        } catch (e) {}
+      }
+    }
+
+    fetch('/api/save-menu')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.menuData && !localSavedData) {
+          setCurrentMenuData(data.menuData);
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
+
+  const chefSpecials = currentMenuData?.chefSpecials || [];
+  const specialties = chefSpecials.map((item, index) => ({
     id: index + 1,
     name: item.name,
     image: item.image,
