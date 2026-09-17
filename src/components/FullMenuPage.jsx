@@ -111,13 +111,49 @@ export default function FullMenuPage() {
     });
   };
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = async (e, callback) => {
     const file = e.target.files?.[0];
     if (file) {
-      const compressedBase64 = await compressImage(file);
-      setNewDish(prev => ({ ...prev, image: compressedBase64, imageSource: 'upload' }));
+      setIsSaving(true);
+      setSaveMessage('Uploading photo to backend server...');
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        const res = await fetch('/api/save-menu/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && data.imagePath) {
+          setSaveMessage('✓ Photo uploaded successfully!');
+          setTimeout(() => setSaveMessage(''), 3000);
+          if (callback) {
+            callback(data.imagePath);
+          } else {
+            setNewDish(prev => ({ ...prev, image: data.imagePath, imageSource: 'upload' }));
+          }
+        } else {
+          const compressedBase64 = await compressImage(file);
+          if (callback) {
+            callback(compressedBase64);
+          } else {
+            setNewDish(prev => ({ ...prev, image: compressedBase64, imageSource: 'upload' }));
+          }
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        const compressedBase64 = await compressImage(file);
+        if (callback) {
+          callback(compressedBase64);
+        } else {
+          setNewDish(prev => ({ ...prev, image: compressedBase64, imageSource: 'upload' }));
+        }
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
+
 
   // Always retrieve fresh, deep-cloned menu data combining local storage and state
   const getFreshMenuData = () => {
@@ -786,18 +822,31 @@ export default function FullMenuPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-gold/15 bg-primary-light/30 flex justify-between items-center">
-                <button
-                  onClick={() => {
-                    const { catId, itemIndex, item } = selectedDish;
-                    setSelectedDish(null);
-                    handleDeleteDish(catId, itemIndex, item.name);
-                  }}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 transition-all cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  Delete This Dish
-                </button>
+              <div className="p-4 border-t border-gold/15 bg-primary-light/30 flex flex-wrap justify-between items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const { catId, itemIndex, item } = selectedDish;
+                      setSelectedDish(null);
+                      handleDeleteDish(catId, itemIndex, item.name);
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 transition-all cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Dish
+                  </button>
+
+                  <label className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-gold text-primary-dark hover:bg-gold-light transition-all cursor-pointer shadow-md">
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload New Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, (uploadedPath) => handleAssignImage(uploadedPath))}
+                    />
+                  </label>
+                </div>
 
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-gray-400 hidden sm:inline">
