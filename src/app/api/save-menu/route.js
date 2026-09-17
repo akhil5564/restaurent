@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://127.0.0.1:5001';
+const BACKEND_URL = process.env.BACKEND_URL || 'https://kanary-backend.onrender.com';
 
 export async function GET() {
   // 1. Try fetching from Backend Server first

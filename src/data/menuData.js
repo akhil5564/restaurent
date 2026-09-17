@@ -1,6 +1,35 @@
 export const menuData = {
   "chefSpecials": [
     {
+      "name": "new2",
+      "price": 200,
+      "description": "",
+      "spicy": false,
+      "veg": false,
+      "dairy": false,
+      "image": "https://res.cloudinary.com/lzebcil2/image/upload/v1789642283/kanary_restaurant_dishes/ITM0001362_u1brcz.jpg"
+    },
+    {
+      "name": "new1",
+      "price": 300,
+      "description": "",
+      "spicy": false,
+      "veg": false,
+      "dairy": false,
+      "image": "https://res.cloudinary.com/lzebcil2/image/upload/v1789643306/kanary_restaurant_dishes/ITM0001368_phbmq3.jpg",
+      "_id": "6aabcc8f97f397ad6b4a0481"
+    },
+    {
+      "name": "new1",
+      "price": 400,
+      "description": "",
+      "spicy": false,
+      "veg": false,
+      "dairy": false,
+      "image": "https://res.cloudinary.com/lzebcil2/image/upload/v1789643306/kanary_restaurant_dishes/ITM0001368_phbmq3.jpg",
+      "_id": "6aabcc8f97f397ad6b4a0482"
+    },
+    {
       "name": "Kanary Smoked Beef Brisket",
       "price": 659,
       "description": "Premium slow-smoked beef brisket, infused with aromatic spices and natural wood smoke.",
@@ -49,7 +78,7 @@ export const menuData = {
       "spicy": false,
       "veg": false,
       "dairy": false,
-      "image": "https://res.cloudinary.com/lzebcil2/image/upload/v1789642277/kanary_restaurant_dishes/ITM0000564_f43cqi.jpg",
+      "image": "https://res.cloudinary.com/lzebcil2/image/upload/v1789643299/kanary_restaurant_dishes/ITM0000635_xkcogb.jpg",
       "_id": "6aabc6a9cccddf301afc74a9"
     },
     {
