@@ -63,18 +63,39 @@ const upload = multer({
   },
 });
 
-// Helper functions to read and write menu data
-function readMenuData() {
+const Menu = require('./models/Menu');
+
+// Helper functions to read and write menu data (MongoDB + JSON fallback)
+async function readMenuData() {
+  if (mongoose.connection.readyState === 1) {
+    try {
+      let doc = await Menu.findOne();
+      if (!doc) {
+        const initialData = readJsonFallback();
+        doc = await Menu.create(initialData);
+        console.log('🌱 Seeded MongoDB database with initial menu data!');
+      }
+      const raw = doc.toObject();
+      delete raw._id;
+      delete raw.__v;
+      delete raw.createdAt;
+      delete raw.updatedAt;
+      return raw;
+    } catch (err) {
+      console.warn('MongoDB read fallback:', err.message);
+    }
+  }
+  return readJsonFallback();
+}
+
+function readJsonFallback() {
   try {
     if (fs.existsSync(MENU_JSON_PATH)) {
       const data = fs.readFileSync(MENU_JSON_PATH, 'utf8');
       return JSON.parse(data);
     }
-  } catch (err) {
-    console.error('Error reading menuData.json:', err);
-  }
+  } catch (err) {}
 
-  // Fallback to JS file if JSON file is missing
   try {
     if (fs.existsSync(SRC_MENU_JS_PATH)) {
       const content = fs.readFileSync(SRC_MENU_JS_PATH, 'utf8');
@@ -84,25 +105,31 @@ function readMenuData() {
         return JSON.parse(content.substring(start, end + 1));
       }
     }
-  } catch (err) {
-    console.error('Error reading menuData.js fallback:', err);
-  }
+  } catch (err) {}
 
   return {};
 }
 
-function writeMenuData(menuData) {
+async function writeMenuData(menuData) {
   try {
-    // 1. Write to backend/data/menuData.json
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await Menu.deleteMany({});
+        await Menu.create(menuData);
+        console.log('💾 Menu data saved to MongoDB database!');
+      } catch (dbErr) {
+        console.warn('MongoDB save warning:', dbErr.message);
+      }
+    }
+
+    // 2. Write to backend/data/menuData.json
     fs.writeFileSync(MENU_JSON_PATH, JSON.stringify(menuData, null, 2), 'utf8');
 
-    // 2. Also write to src/data/menuData.js for codebase consistency
+    // 3. Also write to src/data/menuData.js for codebase consistency
     try {
       const jsContent = 'export const menuData = ' + JSON.stringify(menuData, null, 2) + ';\n';
       fs.writeFileSync(SRC_MENU_JS_PATH, jsContent, 'utf8');
-    } catch (e) {
-      console.warn('Could not update src/data/menuData.js (read-only or missing path):', e.message);
-    }
+    } catch (e) {}
 
     return true;
   } catch (err) {
@@ -115,23 +142,28 @@ function writeMenuData(menuData) {
 
 // 1. Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', server: 'Kanary Restaurant Backend', timestamp: new Date() });
+  res.json({
+    status: 'ok',
+    server: 'Kanary Restaurant Backend',
+    database: mongoose.connection.readyState === 1 ? 'MongoDB Connected' : 'Local JSON Storage',
+    timestamp: new Date(),
+  });
 });
 
 // 2. GET Menu Data
-app.get('/api/menu', (req, res) => {
-  const menuData = readMenuData();
+app.get('/api/menu', async (req, res) => {
+  const menuData = await readMenuData();
   res.json({ success: true, menuData });
 });
 
 // 3. POST / Full Update Menu Data
-app.post('/api/menu', (req, res) => {
+app.post('/api/menu', async (req, res) => {
   const { menuData } = req.body;
   if (!menuData) {
     return res.status(400).json({ success: false, error: 'No menuData provided' });
   }
 
-  const success = writeMenuData(menuData);
+  const success = await writeMenuData(menuData);
   if (success) {
     return res.json({ success: true, menuData, message: 'Menu data saved successfully!' });
   } else {
@@ -149,13 +181,10 @@ app.post('/api/menu/upload', upload.single('image'), (req, res) => {
     const filename = req.file.filename;
     const imagePath = `/uploads/${filename}`;
 
-    // Copy to public/uploads directory for frontend static access
     try {
       const publicDest = path.join(PUBLIC_UPLOADS_DIR, filename);
       fs.copyFileSync(req.file.path, publicDest);
-    } catch (copyErr) {
-      console.warn('Could not copy file to public/uploads:', copyErr.message);
-    }
+    } catch (copyErr) {}
 
     console.log(`[Upload] Image uploaded successfully: ${imagePath}`);
     return res.json({
@@ -171,14 +200,14 @@ app.post('/api/menu/upload', upload.single('image'), (req, res) => {
 });
 
 // 5. POST Add New Dish
-app.post('/api/menu/add', (req, res) => {
+app.post('/api/menu/add', async (req, res) => {
   try {
     const { category, dish } = req.body;
     if (!category || !dish || !dish.name) {
       return res.status(400).json({ success: false, error: 'Category and dish name are required' });
     }
 
-    const menuData = readMenuData();
+    const menuData = await readMenuData();
     if (!menuData[category]) {
       menuData[category] = [];
     }
@@ -193,10 +222,9 @@ app.post('/api/menu/add', (req, res) => {
       image: dish.image || '/menu-images/Soups/ITM0000557.jpg',
     };
 
-    // Add new dish to beginning of category
     menuData[category].unshift(newDish);
 
-    const saved = writeMenuData(menuData);
+    const saved = await writeMenuData(menuData);
     if (saved) {
       console.log(`[Add Dish] Added "${newDish.name}" to category "${category}"`);
       return res.json({ success: true, menuData, addedDish: newDish, message: `Dish "${newDish.name}" added successfully` });
@@ -210,14 +238,14 @@ app.post('/api/menu/add', (req, res) => {
 });
 
 // 6. PUT Update Existing Dish
-app.put('/api/menu/item', (req, res) => {
+app.put('/api/menu/item', async (req, res) => {
   try {
     const { category, index, dish } = req.body;
     if (!category || index === undefined || !dish) {
       return res.status(400).json({ success: false, error: 'Category, index, and dish are required' });
     }
 
-    const menuData = readMenuData();
+    const menuData = await readMenuData();
     if (!menuData[category] || !menuData[category][index]) {
       return res.status(404).json({ success: false, error: 'Category or dish index not found' });
     }
@@ -227,7 +255,7 @@ app.put('/api/menu/item', (req, res) => {
       ...dish,
     };
 
-    const saved = writeMenuData(menuData);
+    const saved = await writeMenuData(menuData);
     if (saved) {
       return res.json({ success: true, menuData, message: 'Dish updated successfully' });
     } else {
@@ -240,7 +268,7 @@ app.put('/api/menu/item', (req, res) => {
 });
 
 // 7. DELETE Dish from Menu
-app.delete('/api/menu/item', (req, res) => {
+app.delete('/api/menu/item', async (req, res) => {
   try {
     const category = req.query.category || req.body.category;
     const index = req.query.index !== undefined ? Number(req.query.index) : req.body.index;
@@ -249,7 +277,7 @@ app.delete('/api/menu/item', (req, res) => {
       return res.status(400).json({ success: false, error: 'Category and valid index are required' });
     }
 
-    const menuData = readMenuData();
+    const menuData = await readMenuData();
     if (!menuData[category]) {
       return res.status(404).json({ success: false, error: 'Category not found' });
     }
@@ -257,7 +285,7 @@ app.delete('/api/menu/item', (req, res) => {
     const deletedItem = menuData[category][index];
     menuData[category].splice(index, 1);
 
-    const saved = writeMenuData(menuData);
+    const saved = await writeMenuData(menuData);
     if (saved) {
       console.log(`[Delete Dish] Deleted index ${index} from "${category}"`);
       return res.json({
