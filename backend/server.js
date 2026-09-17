@@ -4,9 +4,17 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const mongoose = require('mongoose');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// MongoDB Database Connection
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB database successfully!'))
+    .catch((err) => console.warn('⚠️ MongoDB Connection warning:', err.message));
+}
 
 // Directories
 const BACKEND_DIR = __dirname;
