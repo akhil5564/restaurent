@@ -34,32 +34,31 @@ export default function FullMenuPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
 
-  // Load latest persisted menu data from localStorage on mount.
-  // If localStorage exists, DO NOT perform async GET fetch to prevent race condition overwrites!
+  // Load local cache for instant render, then fetch latest master menu from server for multi-device sync
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('kanary_menu_data');
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          setCurrentMenuData(parsed);
-          return; // Stop here! Do not perform async fetch that could race and overwrite edits.
+          setCurrentMenuData(JSON.parse(saved));
         } catch (e) {}
       }
     }
 
-    // Only if localStorage is empty, fetch disk menu data once
+    // Always fetch latest master menu from server so all devices sync added & deleted items
     fetch('/api/save-menu')
       .then(res => res.json())
       .then(data => {
         if (data.success && data.menuData) {
-          if (typeof window !== 'undefined' && !localStorage.getItem('kanary_menu_data')) {
-            setCurrentMenuData(data.menuData);
-            localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
+          setCurrentMenuData(data.menuData);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
+            } catch (e) {}
           }
         }
       })
-      .catch(err => console.error('Failed to load menu from disk API:', err));
+      .catch(err => console.error('Failed to sync master menu from server:', err));
   }, []);
 
   // Add New Dish State

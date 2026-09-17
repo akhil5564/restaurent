@@ -14,9 +14,7 @@ export default function Menu() {
       const saved = localStorage.getItem('kanary_menu_data');
       if (saved) {
         try {
-          const parsed = JSON.parse(saved);
-          setCurrentMenuData(parsed);
-          return;
+          setCurrentMenuData(JSON.parse(saved));
         } catch (e) {}
       }
     }
@@ -25,8 +23,11 @@ export default function Menu() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.menuData) {
-          if (typeof window !== 'undefined' && !localStorage.getItem('kanary_menu_data')) {
-            setCurrentMenuData(data.menuData);
+          setCurrentMenuData(data.menuData);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
+            } catch (e) {}
           }
         }
       })
