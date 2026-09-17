@@ -20,8 +20,45 @@ const categories = [
   { id: 'desserts', name: "Sweet Endings & Teas", icon: "🍰" },
 ];
 
+// Build itemCode -> Cloudinary URL lookup map from allImagesByFolder
+const cloudinaryImageMap = {};
+Object.values(allImagesByFolder).forEach(folder => {
+  if (Array.isArray(folder)) {
+    folder.forEach(item => {
+      if (item.filename && item.path) {
+        const codeMatch = item.filename.match(/ITM\d+/i);
+        if (codeMatch) {
+          cloudinaryImageMap[codeMatch[0].toUpperCase()] = item.path;
+        }
+      }
+    });
+  }
+});
+
+const DEFAULT_CLOUDINARY_IMAGE = "https://res.cloudinary.com/lzebcil2/image/upload/v1789643306/kanary_restaurant_dishes/ITM0001368_phbmq3.jpg";
+
+const sanitizeCloudinaryUrls = (menuDataObj) => {
+  if (!menuDataObj || typeof menuDataObj !== 'object') return menuDataObj;
+  const cleaned = JSON.parse(JSON.stringify(menuDataObj));
+  Object.keys(cleaned).forEach(cat => {
+    if (Array.isArray(cleaned[cat])) {
+      cleaned[cat].forEach(dish => {
+        if (!dish.image || dish.image.startsWith('/menu-images')) {
+          const match = (dish.image || dish.name || '').match(/ITM\d+/i);
+          if (match && cloudinaryImageMap[match[0].toUpperCase()]) {
+            dish.image = cloudinaryImageMap[match[0].toUpperCase()];
+          } else {
+            dish.image = DEFAULT_CLOUDINARY_IMAGE;
+          }
+        }
+      });
+    }
+  });
+  return cleaned;
+};
+
 export default function FullMenuPage() {
-  const [currentMenuData, setCurrentMenuData] = useState(initialMenuData);
+  const [currentMenuData, setCurrentMenuData] = useState(() => sanitizeCloudinaryUrls(initialMenuData));
   const [activeTab, setActiveTab] = useState('chefSpecials');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, veg, spicy, dairy
@@ -40,7 +77,8 @@ export default function FullMenuPage() {
       const saved = localStorage.getItem('kanary_menu_data');
       if (saved) {
         try {
-          setCurrentMenuData(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          setCurrentMenuData(sanitizeCloudinaryUrls(parsed));
         } catch (e) {}
       }
     }
@@ -50,10 +88,11 @@ export default function FullMenuPage() {
       .then(res => res.json())
       .then(data => {
         if (data.success && data.menuData) {
-          setCurrentMenuData(data.menuData);
+          const sanitized = sanitizeCloudinaryUrls(data.menuData);
+          setCurrentMenuData(sanitized);
           if (typeof window !== 'undefined') {
             try {
-              localStorage.setItem('kanary_menu_data', JSON.stringify(data.menuData));
+              localStorage.setItem('kanary_menu_data', JSON.stringify(sanitized));
             } catch (e) {}
           }
         }
@@ -183,7 +222,7 @@ export default function FullMenuPage() {
       spicy: newDish.spicy,
       veg: newDish.veg,
       dairy: newDish.dairy,
-      image: newDish.image || '/menu-images/Soups/ITM0000557.jpg',
+      image: newDish.image || DEFAULT_CLOUDINARY_IMAGE,
     };
 
     const updatedData = getFreshMenuData();
@@ -588,36 +627,18 @@ export default function FullMenuPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-primary-dark/80 via-transparent to-transparent" />
                         
                         {editMode && (
-                          <div className="absolute bottom-2 left-2 right-2 z-20 bg-primary-dark/95 backdrop-blur-md p-2 rounded-xl border border-gold/40 flex items-center gap-2 overflow-x-auto scrollbar-none">
-                            <span className="text-[10px] font-bold text-gold uppercase whitespace-nowrap px-1">Pick Photo:</span>
-                            {[
-                              { label: 'Smoked Brisket', path: '/menu-images/Brazilian Churrasca/ITM0001368.jpg' },
-                              { label: 'Beef Ribs', path: '/menu-images/Brazilian Churrasca/ITM0001355.jpg' },
-                              { label: 'Tenderloin Steak', path: '/menu-images/Brazilian Churrasca/ITM0001364.jpg' },
-                              { label: 'BBQ Ribs', path: '/menu-images/grilled/ITM0001353.jpg' },
-                              { label: 'Wagyu Steak', path: '/menu-images/grilled/ITM0001360.jpg' },
-                              { label: 'Cheese Chicken', path: '/menu-images/grilled/ITM0001361.jpg' },
-                              { label: 'Grilled Chicken', path: '/menu-images/Shawarma & Shawaya/ITM0001370.jpg' }
-                            ].map((pObj, pIdx) => (
-                              <button
-                                key={pIdx}
-                                onClick={() => handleAssignImage(pObj.path)}
-                                className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all relative ${
-                                  item.image === pObj.path ? 'border-gold ring-2 ring-gold' : 'border-gold/20 hover:border-gold/70'
-                                }`}
-                                title={pObj.label}
-                              >
-                                <img src={pObj.path} alt={pObj.label} className="w-full h-full object-cover" />
-                              </button>
-                            ))}
+                          <div className="absolute bottom-2 left-2 right-2 z-20 bg-primary-dark/95 backdrop-blur-md p-2 rounded-xl border border-gold/40 flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-bold text-gold uppercase px-1">Manage Photo:</span>
                             <button
+                              type="button"
                               onClick={() => {
                                 setSelectedDish({ catId: cat.id, itemIndex: itemIdx, item });
                                 setActiveFolder('Brazilian Churrasca');
                               }}
-                              className="flex-shrink-0 bg-gold text-primary-dark text-[10px] font-bold px-2 py-1 rounded-lg uppercase whitespace-nowrap ml-auto"
+                              className="bg-gold hover:bg-gold-light text-primary-dark text-xs font-bold px-3 py-1.5 rounded-lg uppercase transition-all shadow-md flex items-center gap-1 cursor-pointer"
                             >
-                              More...
+                              <Upload className="w-3.5 h-3.5" />
+                              Change / Upload Photo
                             </button>
                           </div>
                         )}
